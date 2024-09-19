@@ -1,0 +1,64 @@
+body {
+    font-family: 'Roboto', sans-serif;
+    text-align: center;
+    margin: 0;
+    background-color: #f5f5f5;
+}
+
+#top-buttons, #player-buttons {
+    margin: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#top-buttons button, #player-buttons button {
+    margin: 5px;
+    padding: 12px 20px; /* Increased padding for touch targets */
+    border: none;
+    border-radius: 5px;
+    background-color: #6200ee;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+#top-buttons button:hover, #player-buttons button:hover {
+    background-color: #3700b3;
+}
+
+#top-buttons button:focus, #player-buttons button:focus {
+    outline: none;
+}
+
+#player-buttons button.active {
+    background-color: #03dac6;
+    color: #000;
+}
+
+#court-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    border: 4px solid #000;
+    box-sizing: border-box;
+}
+
+#court {
+    width: 100%;
+    display: block;
+    background-color: #fff;
+    cursor: crosshair;
+    touch-action: none; /* Prevents touch event interference */
+}
+
+@media (max-width: 600px) {
+    #top-buttons button, #player-buttons button {
+        font-size: 14px;
+        padding: 10px 15px;
+    }
+
+    #court-container {
+        border-width: 2px;
+    }
+}
