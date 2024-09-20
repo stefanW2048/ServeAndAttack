@@ -133,8 +133,10 @@ function drawLine(start, end) {
 
 // Handle mouse move
 function handleMouseMove(e) {
+	const currentPosition = getMousePos(e);
+	
     if (clickStartPoint != null) {
-        const currentPosition = getMousePos(e);
+        
             drawServes();
             drawArrow(
                 clickStartPoint.x * canvas.width,
@@ -143,8 +145,21 @@ function handleMouseMove(e) {
                 currentPosition.y* canvas.height,
                 'blue'
             );
-        
+        return;
     }
+	
+	if (mouseDownPoint != null) {
+            drawServes();
+            drawArrow(
+                mouseDownPoint.x * canvas.width,
+                mouseDownPoint.y * canvas.height,
+                currentPosition.x* canvas.width,
+                currentPosition.y* canvas.height,
+                'blue'
+            );
+        return;
+    }
+	
 }
 
 // Handle mouse up
