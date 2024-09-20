@@ -184,7 +184,7 @@ const currentPosition = getMousePos(e);
 function handleTouchStart(e) {
     e.preventDefault();
     if (!currentPlayer) {
-        alert('Please select a player first.');
+        addPlayer();
         return;
     }
 
