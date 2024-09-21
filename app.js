@@ -66,10 +66,38 @@ function isDrag(a, b) {
 }
 
 function resizeCanvas() {
-    canvas.width = canvas.parentElement.clientWidth;
-    canvas.height = canvas.width / 2; // Maintain 2:1 aspect ratio
+    const courtContainer = document.getElementById('court-container');
+    const containerWidth = courtContainer.clientWidth;
+    const containerHeight = courtContainer.clientHeight;
+
+    // Calculate canvas size based on aspect ratio and container dimensions
+    const aspectRatio = 2; // Width:Height ratio is 2:1
+    let canvasWidth, canvasHeight;
+
+    // Adjust for maximum height in landscape orientation
+    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
+    const maxCourtHeight = isLandscape ? window.innerHeight * 0.7 : containerHeight;
+
+    if (containerWidth / maxCourtHeight > aspectRatio) {
+        // Container is wider than the aspect ratio
+        canvasHeight = maxCourtHeight;
+        canvasWidth = canvasHeight * aspectRatio;
+    } else {
+        // Container is taller than the aspect ratio
+        canvasWidth = containerWidth;
+        canvasHeight = canvasWidth / aspectRatio;
+    }
+
+    canvas.width = canvasWidth;
+    canvas.height = canvasHeight;
+
+    canvas.style.width = canvasWidth + 'px';
+    canvas.style.height = canvasHeight + 'px';
+
     drawServes();
 }
+
+
 
 function addPlayer() {
     const name = prompt('Enter player name:');
