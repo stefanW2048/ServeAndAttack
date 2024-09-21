@@ -2,21 +2,14 @@ const canvas = document.getElementById('court');
 const ctx = canvas.getContext('2d');
 let players = {};
 let currentPlayer = null;
-let isDrawing = false;
-let isMouseDown = false;
-let startX, startY;
-let dragStartX, dragStartY; // Variables for drag-and-drop
-let clickStartX, clickStartY; // Variables for two-click method
-// Threshold to distinguish between a click and a drag
-const threshold = 0.01;
+
+// threshold to distinguish between a click and a drag
+const DRAG_THRESHOLD = 0.01;
 
 let mouseDownPoint = null;
 let clickStartPoint = null;
 
 let flipped = false;
-
-/* Movement threshold to differentiate between click and drag */
-const MOVE_THRESHOLD = 5;
 
 resizeCanvas();
 window.addEventListener('resize', resizeCanvas);
@@ -54,7 +47,7 @@ function deltaX(a, b) {
 
 // Function to determine if the action is a drag
 function isDrag(a, b) {
-    return deltaX(a, b) > threshold;
+    return deltaX(a, b) > DRAG_THRESHOLD;
 }
 
 
