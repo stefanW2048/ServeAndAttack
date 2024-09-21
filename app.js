@@ -3,7 +3,7 @@ const ctx = canvas.getContext('2d');
 let players = {};
 let currentPlayer = null;
 
-// threshold to distinguish between a click and a drag
+// Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
 
 let mouseDownPoint = null;
@@ -21,22 +21,34 @@ document.getElementById('undo').addEventListener('click', undoLastServe);
 document.getElementById('reset').addEventListener('click', resetApp);
 document.getElementById('flip').addEventListener('click', flipCourt);
 
-// Event listeners for mouse events
-canvas.addEventListener('mousedown', handleMouseDown);
-canvas.addEventListener('mousemove', handleMouseMove);
-canvas.addEventListener('mouseup', handleMouseUp);
+// Unified event listeners for both mouse and touch events
+canvas.addEventListener('mousedown', handleStart);
+canvas.addEventListener('mousemove', handleMove);
+canvas.addEventListener('mouseup', handleEnd);
 
-// Event listeners for touch events (mobile devices)
-canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
-canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-canvas.addEventListener('touchend', handleTouchEnd);
+canvas.addEventListener('touchstart', handleStart, { passive: false });
+canvas.addEventListener('touchmove', handleMove, { passive: false });
+canvas.addEventListener('touchend', handleEnd);
 
-// Helper function to get the current mouse position
-function getMousePos(e) {
+// Helper function to get the current position from mouse or touch event
+function getEventPos(e) {
     const rect = canvas.getBoundingClientRect();
+    let clientX, clientY;
+
+    if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+    } else if (e.changedTouches && e.changedTouches.length > 0) {
+        clientX = e.changedTouches[0].clientX;
+        clientY = e.changedTouches[0].clientY;
+    } else {
+        clientX = e.clientX;
+        clientY = e.clientY;
+    }
+
     return {
-        x: (e.clientX - rect.left)/ canvas.width,
-        y: (e.clientY - rect.top)/ canvas.height
+        x: (clientX - rect.left) / canvas.width,
+        y: (clientY - rect.top) / canvas.height
     };
 }
 
@@ -49,8 +61,6 @@ function deltaX(a, b) {
 function isDrag(a, b) {
     return deltaX(a, b) > DRAG_THRESHOLD;
 }
-
-
 
 function resizeCanvas() {
     canvas.width = canvas.parentElement.clientWidth;
@@ -91,15 +101,15 @@ function updatePlayerButtons() {
     }
 }
 
-/* Event Handling Functions */
+/* Unified Event Handling Functions */
 
-// Handle mouse down
-function handleMouseDown(e) {
+function handleStart(e) {
+    e.preventDefault();
     if (!currentPlayer) {
         addPlayer();
         return;
     }
-	const currentPosition = getMousePos(e);
+    const currentPosition = getEventPos(e);
 
     if (clickStartPoint !== null) {
         drawLine(clickStartPoint, currentPosition);
@@ -108,140 +118,62 @@ function handleMouseDown(e) {
     } else {
         mouseDownPoint = currentPosition;
     }
-   
+}
+
+function handleMove(e) {
+    e.preventDefault();
+    const currentPosition = getEventPos(e);
+
+    if (clickStartPoint != null) {
+        drawServes();
+        drawArrow(
+            clickStartPoint.x * canvas.width,
+            clickStartPoint.y * canvas.height,
+            currentPosition.x * canvas.width,
+            currentPosition.y * canvas.height,
+            'blue'
+        );
+        return;
+    }
+
+    if (mouseDownPoint != null) {
+        drawServes();
+        drawArrow(
+            mouseDownPoint.x * canvas.width,
+            mouseDownPoint.y * canvas.height,
+            currentPosition.x * canvas.width,
+            currentPosition.y * canvas.height,
+            'blue'
+        );
+        return;
+    }
+}
+
+function handleEnd(e) {
+    e.preventDefault();
+    const currentPosition = getEventPos(e);
+
+    if (mouseDownPoint !== null) {
+        if (isDrag(mouseDownPoint, currentPosition)) {
+            drawLine(mouseDownPoint, currentPosition);
+            mouseDownPoint = null;
+        } else {
+            clickStartPoint = mouseDownPoint;
+        }
+    }
 }
 
 function drawLine(start, end) {
-	
-	if (isValidServe(start.x, end.x)) {
-		const serve = { startX: start.x, startY: start.y, endX:end.x, endY:end.y };
+    if (isValidServe(start.x, end.x)) {
+        const serve = { startX: start.x, startY: start.y, endX: end.x, endY: end.y };
         players[currentPlayer].push(serve);
         drawServes();
-
     } else {
-        alert('invalid serve');
+        alert('Invalid serve');
     }
-
-}
-
-// Handle mouse move
-function handleMouseMove(e) {
-	const currentPosition = getMousePos(e);
-	
-    if (clickStartPoint != null) {
-        
-            drawServes();
-            drawArrow(
-                clickStartPoint.x * canvas.width,
-                clickStartPoint.y * canvas.height,
-                currentPosition.x* canvas.width,
-                currentPosition.y* canvas.height,
-                'blue'
-            );
-        return;
-    }
-	
-	if (mouseDownPoint != null) {
-            drawServes();
-            drawArrow(
-                mouseDownPoint.x * canvas.width,
-                mouseDownPoint.y * canvas.height,
-                currentPosition.x* canvas.width,
-                currentPosition.y* canvas.height,
-                'blue'
-            );
-        return;
-    }
-	
-}
-
-// Handle mouse up
-function handleMouseUp(e) {
-
-	const currentPosition = getMousePos(e);
-
-    if (mouseDownPoint !== null) {
-        if (isDrag(mouseDownPoint, currentPosition)) {
-            drawLine(mouseDownPoint, currentPosition);
-            mouseDownPoint = null;
-        } else {
-            clickStartPoint = mouseDownPoint;
-        }
-    }
-    
-}
-
-
-/* Touch Event Handlers */
-
-function handleTouchStart(e) {
-    e.preventDefault();
-	
-	 if (!currentPlayer) {
-        addPlayer();
-        return;
-    }
-	const currentPosition = getMousePos(e.touches[0]);
-
-    if (clickStartPoint !== null) {
-        drawLine(clickStartPoint, currentPosition);
-        clickStartPoint = null;
-        mouseDownPoint = null;
-    } else {
-        mouseDownPoint = currentPosition;
-    }
-	
-
-}
-
-function handleTouchMove(e) {
-    e.preventDefault();
-    const currentPosition = getMousePos(e.touches[0]);
-	
-    if (clickStartPoint != null) {
-        
-            drawServes();
-            drawArrow(
-                clickStartPoint.x * canvas.width,
-                clickStartPoint.y * canvas.height,
-                currentPosition.x* canvas.width,
-                currentPosition.y* canvas.height,
-                'blue'
-            );
-        return;
-    }
-	
-	if (mouseDownPoint != null) {
-            drawServes();
-            drawArrow(
-                mouseDownPoint.x * canvas.width,
-                mouseDownPoint.y * canvas.height,
-                currentPosition.x* canvas.width,
-                currentPosition.y* canvas.height,
-                'blue'
-            );
-        return;
-    }
-}
-
-function handleTouchEnd(e) {
-	
-	const currentPosition = getMousePos(e.changedTouches[0]);
-
-    if (mouseDownPoint !== null) {
-        if (isDrag(mouseDownPoint, currentPosition)) {
-            drawLine(mouseDownPoint, currentPosition);
-            mouseDownPoint = null;
-        } else {
-            clickStartPoint = mouseDownPoint;
-        }
-    }
-
-   
 }
 
 function isValidServe(sx, ex) {
-	//alert('isValidServe '+ sx+' '+ex);
     if (!flipped) {
         return sx < 0.5 && ex > 0.5;
     } else {
@@ -299,7 +231,7 @@ function drawCourt() {
         ];
     } else {
         // Own field is on the right
-        // Labels: from top to bottom: 2 1, 3 6, 4 5
+        // Labels: from top to bottom: 1 2, 6 3, 5 4
         positions = [
             { num: '1', x: oneThirdX, y: positionsY[0] },
             { num: '2', x: twoThirdX, y: positionsY[0] },
@@ -348,7 +280,6 @@ function drawArrow(sx, sy, ex, ey, color) {
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.moveTo(ex, ey);
     ctx.lineTo(
         ex - headlen * Math.cos(angle - Math.PI / 6),
         ey - headlen * Math.sin(angle - Math.PI / 6)
