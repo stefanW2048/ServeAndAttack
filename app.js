@@ -74,13 +74,9 @@ function resizeCanvas() {
     const aspectRatio = 2; // Width:Height ratio is 2:1
     let canvasWidth, canvasHeight;
 
-    // Adjust for maximum height in landscape orientation
-    const isLandscape = window.matchMedia("(orientation: landscape)").matches;
-    const maxCourtHeight = isLandscape ? window.innerHeight * 0.7 : containerHeight;
-
-    if (containerWidth / maxCourtHeight > aspectRatio) {
+    if (containerWidth / containerHeight > aspectRatio) {
         // Container is wider than the aspect ratio
-        canvasHeight = maxCourtHeight;
+        canvasHeight = containerHeight;
         canvasWidth = canvasHeight * aspectRatio;
     } else {
         // Container is taller than the aspect ratio
@@ -96,6 +92,7 @@ function resizeCanvas() {
 
     drawServes();
 }
+
 
 
 

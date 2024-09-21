@@ -8,14 +8,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 </head>
 <body>
-    <div id="top-buttons">
-        <button id="add-player">Add player</button>
-        <button id="undo">Undo</button>
-        <button id="reset">Reset</button>
-        <button id="flip">Flip</button>
-    </div>
-    <div id="court-container">
-        <canvas id="court"></canvas>
+    <!-- Remove top-buttons from here -->
+    <!-- Wrap court-container and top-buttons in a new div -->
+    <div id="main-content">
+		<div id="top-buttons">
+            <button id="add-player">Add player</button>
+            <button id="undo">Undo</button>
+            <button id="reset">Reset</button>
+            <button id="flip">Flip</button>
+        </div>
+        <div id="court-container">
+            <canvas id="court"></canvas>
+        </div>
+        
     </div>
     <div id="player-buttons">
         <!-- Player buttons will be dynamically added here -->
