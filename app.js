@@ -167,16 +167,14 @@ function handleEnd(e) {
 }
 
 function drawLine(start, end) {
-    if (isValidServe(start.x, end.x)) {
+    if (isValidLine(start.x, end.x)) {
         const serve = { startX: start.x, startY: start.y, endX: end.x, endY: end.y };
         players[currentPlayer].push(serve);
-    } else {
-        alert('Invalid serve');
-    }
+    } 
 	drawServes();
 }
 
-function isValidServe(sx, ex) {
+function isValidLine(sx, ex) {
     if (!flipped) {
         return sx < 0.5 && ex > 0.5;
     } else {
