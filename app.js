@@ -6,6 +6,9 @@ let currentPlayer = null;
 // Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
 
+const FIELD_SIZE = 0.8;
+const BORDER_SIZE = 0.5*(1.0 - FIELD_SIZE);
+
 let mouseDownPoint = null;
 let clickStartPoint = null;
 
@@ -167,10 +170,10 @@ function drawLine(start, end) {
     if (isValidServe(start.x, end.x)) {
         const serve = { startX: start.x, startY: start.y, endX: end.x, endY: end.y };
         players[currentPlayer].push(serve);
-        drawServes();
     } else {
         alert('Invalid serve');
     }
+	drawServes();
 }
 
 function isValidServe(sx, ex) {
@@ -194,6 +197,17 @@ function drawCourt() {
     ctx.moveTo(canvas.width / 2, 0);
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
+
+    // Draw additional rectangle that is 10% smaller than the main rectangle
+
+    const insetX = canvas.width * BORDER_SIZE;
+    const insetY = canvas.height * BORDER_SIZE;
+    const innerWidth = canvas.width * FIELD_SIZE;
+    const innerHeight = canvas.height * FIELD_SIZE;
+
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(insetX, insetY, innerWidth, innerHeight);
 
     // Draw labels
     ctx.fillStyle = '#000';
