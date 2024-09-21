@@ -6,7 +6,7 @@ let currentPlayer = null;
 // Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
 
-const FIELD_SIZE = 0.8;
+const FIELD_SIZE = 0.7;
 const BORDER_SIZE = 0.5*(1.0 - FIELD_SIZE);
 
 let mouseDownPoint = null;
@@ -184,6 +184,14 @@ function isValidServe(sx, ex) {
     }
 }
 
+function isAttack(xStart) {
+	if (!flipped) {
+        return xStart > 0.25;
+    } else {
+        return xStart < 0.75;
+    }
+}
+
 function drawCourt() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     // Draw court background
@@ -198,8 +206,7 @@ function drawCourt() {
     ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
 
-    // Draw additional rectangle that is 10% smaller than the main rectangle
-
+    // Draw field rectangle that is smaller than the court rectangle
     const insetX = canvas.width * BORDER_SIZE;
     const insetY = canvas.height * BORDER_SIZE;
     const innerWidth = canvas.width * FIELD_SIZE;
@@ -212,16 +219,35 @@ function drawCourt() {
     // Draw labels
     ctx.fillStyle = '#000';
     ctx.font = '16px Arial';
-    const midX = canvas.width / 2;
-    const midY = canvas.height / 2;
 
     const ownFieldLeft = flipped; // When flipped, own field is on the left
 
-    // Positions for labels at 1/3 and 2/3 horizontally in own field
-    const oneThirdX = ownFieldLeft ? canvas.width / 6 : canvas.width * (5 / 6);
-    const twoThirdX = ownFieldLeft ? canvas.width / 3 : canvas.width * (2 / 3);
+    // Define field boundaries
+    const fieldLeft = insetX;
+    const fieldRight = insetX + innerWidth;
+    const fieldTop = insetY;
+    const fieldBottom = insetY + innerHeight;
 
-    const positionsY = [canvas.height / 6, midY, (5 * canvas.height) / 6];
+    // Define own field boundaries
+    let ownFieldLeftX, ownFieldRightX;
+    if (ownFieldLeft) {
+        ownFieldLeftX = fieldLeft;
+        ownFieldRightX = fieldLeft + innerWidth / 2;
+    } else {
+        ownFieldLeftX = fieldLeft + innerWidth / 2;
+        ownFieldRightX = fieldRight;
+    }
+
+    // Positions for labels at 1/3 and 2/3 horizontally in own field
+    const oneThirdX = ownFieldLeftX + (ownFieldRightX - ownFieldLeftX) * (1 / 3);
+    const twoThirdX = ownFieldLeftX + (ownFieldRightX - ownFieldLeftX) * (2 / 3);
+
+    // Positions Y at 1/6, 1/2, and 5/6 of the field rectangle
+    const positionsY = [
+        fieldTop + (fieldBottom - fieldTop) * (1 / 6),
+        fieldTop + (fieldBottom - fieldTop) * (1 / 2),
+        fieldTop + (fieldBottom - fieldTop) * (5 / 6),
+    ];
 
     // Draw opponent label
     if (!ownFieldLeft) {
@@ -260,6 +286,8 @@ function drawCourt() {
     });
 }
 
+      
+
 function drawServes() {
     drawCourt();
     if (currentPlayer) {
@@ -267,8 +295,11 @@ function drawServes() {
         const totalServes = playerServes.length;
         playerServes.forEach((serve, index) => {
             // Calculate opacity based on serve age
-            const opacity = 0.3 + (0.7 * (index + 1)) / totalServes;
-            const color = `rgba(255, 0, 0, ${opacity})`;
+            const opacity = 0.2 + (0.9 * (index + 1)) / totalServes;
+            let color = `rgba(0, 0, 255, ${opacity})`;
+			if(isAttack(serve.startX)){
+				color = `rgba(255, 0, 0, ${opacity})`;
+			}
 
             // Convert relative coordinates back to actual coordinates
             const startX = serve.startX * canvas.width;
