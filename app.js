@@ -129,24 +129,24 @@ function handleMove(e) {
 
     if (clickStartPoint != null) {
         drawServes();
-        drawArrow(
-            clickStartPoint.x * canvas.width,
-            clickStartPoint.y * canvas.height,
-            currentPosition.x * canvas.width,
-            currentPosition.y * canvas.height,
-            'blue'
+        drawServeOrAttack(
+            clickStartPoint.x,
+            clickStartPoint.y,
+            currentPosition.x,
+            currentPosition.y,
+           1.0
         );
         return;
     }
 
     if (mouseDownPoint != null) {
         drawServes();
-        drawArrow(
-            mouseDownPoint.x * canvas.width,
-            mouseDownPoint.y * canvas.height,
-            currentPosition.x * canvas.width,
-            currentPosition.y * canvas.height,
-            'blue'
+        drawServeOrAttack(
+            mouseDownPoint.x,
+            mouseDownPoint.y,
+            currentPosition.x,
+            currentPosition.y,
+           1.0
         );
         return;
     }
@@ -296,20 +296,24 @@ function drawServes() {
         playerServes.forEach((serve, index) => {
             // Calculate opacity based on serve age
             const opacity = 0.2 + (0.9 * (index + 1)) / totalServes;
-            let color = `rgba(0, 0, 255, ${opacity})`;
-			if(isAttack(serve.startX)){
-				color = `rgba(255, 0, 0, ${opacity})`;
-			}
-
-            // Convert relative coordinates back to actual coordinates
-            const startX = serve.startX * canvas.width;
-            const startY = serve.startY * canvas.height;
-            const endX = serve.endX * canvas.width;
-            const endY = serve.endY * canvas.height;
-
-            drawArrow(startX, startY, endX, endY, color);
+			drawServeOrAttack(serve.startX, serve.startY, serve.endX, serve.endY, opacity);
         });
     }
+}
+
+function drawServeOrAttack(sx, sy, ex, ey, opacity) {
+	const startX = sx * canvas.width;
+    const startY = sy * canvas.height;
+    const endX = ex * canvas.width;
+    const endY = ey * canvas.height;
+
+    drawArrow(startX, startY, endX, endY, getColor(sx,opacity));
+}
+function getColor(sx,opacity){
+	if(isAttack(sx)){
+		return `rgba(255, 0, 0, ${opacity})`;
+	}
+	return `rgba(0, 0, 255, ${opacity})`;
 }
 
 function drawArrow(sx, sy, ex, ey, color) {
