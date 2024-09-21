@@ -165,7 +165,7 @@ function handleMouseMove(e) {
 // Handle mouse up
 function handleMouseUp(e) {
 
-const currentPosition = getMousePos(e);
+	const currentPosition = getMousePos(e);
 
     if (mouseDownPoint !== null) {
         if (isDrag(mouseDownPoint, currentPosition)) {
@@ -183,79 +183,67 @@ const currentPosition = getMousePos(e);
 
 function handleTouchStart(e) {
     e.preventDefault();
-    if (!currentPlayer) {
+	
+	 if (!currentPlayer) {
         addPlayer();
         return;
     }
+	const currentPosition = getMousePos(e.touches[0]);
 
+    if (clickStartPoint !== null) {
+        drawLine(clickStartPoint, currentPosition);
+        clickStartPoint = null;
+        mouseDownPoint = null;
+    } else {
+        mouseDownPoint = currentPosition;
+    }
+	
 
-    const rect = canvas.getBoundingClientRect();
-    const touch = e.touches[0];
-    startX = touch.clientX - rect.left;
-    startY = touch.clientY - rect.top;
-    dragStartX = startX / canvas.width;
-    dragStartY = startY / canvas.height;
-    isMouseDown = true;
-    isDrawing = false; // Reset drawing flag
 }
 
 function handleTouchMove(e) {
     e.preventDefault();
-    if (isMouseDown) {
-        const rect = canvas.getBoundingClientRect();
-        const touch = e.touches[0];
-        const currentX = touch.clientX - rect.left;
-        const currentY = touch.clientY - rect.top;
-
-        const deltaX = currentX - startX;
-        const deltaY = currentY - startY;
-        const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-        if (!isDrawing && distance > MOVE_THRESHOLD) {
-            isDrawing = true;
-        }
-
-        if (isDrawing) {
+    const currentPosition = getMousePos(e.touches[0]);
+	
+    if (clickStartPoint != null) {
+        
             drawServes();
             drawArrow(
-                dragStartX * canvas.width,
-                dragStartY * canvas.height,
-                currentX,
-                currentY,
+                clickStartPoint.x * canvas.width,
+                clickStartPoint.y * canvas.height,
+                currentPosition.x* canvas.width,
+                currentPosition.y* canvas.height,
                 'blue'
             );
-        }
+        return;
+    }
+	
+	if (mouseDownPoint != null) {
+            drawServes();
+            drawArrow(
+                mouseDownPoint.x * canvas.width,
+                mouseDownPoint.y * canvas.height,
+                currentPosition.x* canvas.width,
+                currentPosition.y* canvas.height,
+                'blue'
+            );
+        return;
     }
 }
 
 function handleTouchEnd(e) {
+	
+	const currentPosition = getMousePos(e.changedTouches[0]);
 
-
-        isMouseDown = false;
-
-        if (isDrawing) {
-            isDrawing = false;
-            const rect = canvas.getBoundingClientRect();
-            const touch = e.changedTouches[0];
-            const endX = (touch.clientX - rect.left) / canvas.width;
-            const endY = (touch.clientY - rect.top) / canvas.height;
-
-            if (isValidServe(dragStartX, endX)) {
-                const serve = { startX: dragStartX, startY: dragStartY, endX, endY };
-                players[currentPlayer].push(serve);
-                drawServes();
-            } else {
-                alert('The serve must go from the opponent\'s court to your own court.');
-                drawServes(); // Redraw without the invalid arrow
-            }
-
-            // Reset variables
-            dragStartX = null;
-            dragStartY = null;
+    if (mouseDownPoint !== null) {
+        if (isDrag(mouseDownPoint, currentPosition)) {
+            drawLine(mouseDownPoint, currentPosition);
+            mouseDownPoint = null;
         } else {
-            // Handle tap
-            handleTouchClick(e);
+            clickStartPoint = mouseDownPoint;
         }
+    }
+
    
 }
 
