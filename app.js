@@ -2,8 +2,8 @@ const canvas = document.getElementById('court');
 const ctx = canvas.getContext('2d');
 let players = {};
 let currentPlayer = null;
-let teamNameA = '';
-let teamNameB = '';
+let teamNames = {};
+
 
 // Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
@@ -103,15 +103,15 @@ function addPlayer() {
     if (name) {
         if (!players[name]) {
             // Check if this is the first player
-            if (teamNameA.length == 0) {
+            if (!teamNames[0]) {
                 // Prompt for team name
                 const team = prompt('Enter team name:');
                 if (team) {
-                    teamNameA = team;
+                    teamNames[0]=team;
                 }
 				const opponent = prompt('Enter opponent name:');
                 if (opponent) {
-                    teamNameB = opponent;
+                    teamNames[1]=opponent;
                 }
             }
             players[name] = [];
@@ -289,17 +289,17 @@ function drawCourt() {
     // Draw team name label
     ctx.fillStyle = '#000';
     ctx.font = '16px Arial';
-    const textWidthA = ctx.measureText(teamNameA).width;
-	const textWidthB = ctx.measureText(teamNameB).width;
+    const textWidthA = ctx.measureText(teamNames[0]).width;
+	const textWidthB = ctx.measureText(teamNames[1]).width;
     const padding = 10;
 
     if (!ownFieldLeft) {
-        ctx.fillText(teamNameA, padding, 20);
-		ctx.fillText(teamNameB, canvas.width - textWidthB - padding, 20);
+        ctx.fillText(teamNames[0], padding, 20);
+		ctx.fillText(teamNames[1], canvas.width - textWidthB - padding, 20);
 		
     } else {
-		ctx.fillText(teamNameB, padding, 20);
-        ctx.fillText(teamNameA, canvas.width - textWidthA - padding, 20);
+		ctx.fillText(teamNames[1], padding, 20);
+        ctx.fillText(teamNames[0], canvas.width - textWidthA - padding, 20);
 		
     }
 
