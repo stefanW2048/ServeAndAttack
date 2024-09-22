@@ -39,7 +39,7 @@ body {
     margin: 10px;
     display: flex;
     flex-wrap: wrap;
-    justify-content: left;
+    justify-content: center;
 }
 
 #top-buttons button, #player-buttons button {
@@ -86,11 +86,11 @@ body {
 
     #top-buttons {
         flex-direction: column; /* Arrange buttons vertically */
-        justify-content: flex-start; /* Use flex-start instead of left */
-        align-items: flex-start; /* Use flex-start instead of left */
+        justify-content: left;
+        align-items: left;
         margin: 0;
         padding: 10px;
-        width: 200px;
+        width: auto;
     }
 
     #top-buttons button {
