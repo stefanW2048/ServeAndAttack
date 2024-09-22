@@ -86,11 +86,11 @@ body {
 
     #top-buttons {
         flex-direction: column; /* Arrange buttons vertically */
-        justify-content: left;
-        align-items: left;
+        justify-content: flex-start; /* Use flex-start instead of left */
+        align-items: flex-start; /* Use flex-start instead of left */
         margin: 0;
         padding: 10px;
-        width: auto;
+        width: 200px;
     }
 
     #top-buttons button {
@@ -101,5 +101,23 @@ body {
     #court {
         width: 100%;
         height: auto;
+    }
+	#player-buttons {
+        display: grid; /* Use CSS Grid for better control */
+        grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* Responsive columns */
+        grid-gap: 10px; /* Space between buttons */
+        padding: 10px;
+        width: 30%; /* Allocate 30% width to player-buttons */
+        box-sizing: border-box;
+        overflow: auto; /* Allow scrolling only if necessary */
+        max-height: 100vh; /* Prevent exceeding viewport height */
+    }
+
+    #player-buttons button {
+        padding: 10px; /* Consistent padding */
+        font-size: 16px;
+        width: 100%; /* Make buttons fill the grid cell */
+        box-sizing: border-box;
+		max-height: 30vh; 
     }
 }
