@@ -16,10 +16,10 @@ let clickStartPoint = null;
 
 let flipped = false;
 
-resizeCanvas();
+
 window.addEventListener('resize', resizeCanvas);
 
-drawCourt();
+
 
 document.getElementById('add-player').addEventListener('click', addPlayer);
 document.getElementById('undo').addEventListener('click', undoLastServe);
@@ -34,6 +34,25 @@ canvas.addEventListener('mouseup', handleEnd);
 canvas.addEventListener('touchstart', handleStart, { passive: false });
 canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd);
+
+
+initializeApp();
+resizeCanvas();
+drawCourt();
+
+function initializeApp() {
+    // Prompt for team names
+    const team1 = prompt('Enter the name of Team 1:');
+    const team2 = prompt('Enter the name of Team 2:');
+    if (team1 && team2) {
+        teamNames[0] = team1;
+        teamNames[1] = team2;
+        drawCourt(); // Update the court to display team names
+    } else {
+        alert('Both team names are required.');
+        initializeApp(); // Restart initialization if names are not provided
+    }
+}
 
 // Helper function to get the current position from mouse or touch event
 function getEventPos(e) {
@@ -97,23 +116,12 @@ function resizeCanvas() {
 
 
 
-
 function addPlayer() {
     const name = prompt('Enter player name:');
     if (name) {
         if (!players[name]) {
             // Check if this is the first player
-            if (!teamNames[0]) {
-                // Prompt for team name
-                const team = prompt('Enter team name:');
-                if (team) {
-                    teamNames[0]=team;
-                }
-				const opponent = prompt('Enter opponent name:');
-                if (opponent) {
-                    teamNames[1]=opponent;
-                }
-            }
+
             players[name] = [];
             currentPlayer = name;
             addPlayerButton(name);
