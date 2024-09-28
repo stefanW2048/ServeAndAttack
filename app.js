@@ -1,7 +1,7 @@
 const canvas = document.getElementById('court');
 const ctx = canvas.getContext('2d');
 let teams = [];
-let currentTeamIndex = 0;
+let servingTeamIndex = 0;
 let currentPlayerIndex = null;
 
 // Threshold to distinguish between a click and a drag
@@ -13,7 +13,7 @@ const BORDER_SIZE = 0.5 * (1.0 - FIELD_SIZE);
 let mouseDownPoint = null;
 let clickStartPoint = null;
 
-let flipped = false;
+let courtFlipped = false;
 
 window.addEventListener('resize', resizeCanvas);
 
@@ -60,7 +60,7 @@ function initializeApp() {
                 players: [],
             },
         ];
-        currentTeamIndex = 0;
+        servingTeamIndex = 0;
         currentPlayerIndex = null;
         addTeamButtons();
         updateTeamButtons();
@@ -80,7 +80,7 @@ function addTeamButtons() {
         const btn = document.createElement('button');
         btn.textContent = team.teamName;
         btn.addEventListener('click', () => {
-            currentTeamIndex = index;
+            servingTeamIndex = index;
             currentPlayerIndex = null; // Reset current player
             updateTeamButtons();
             updatePlayerButtons();
@@ -93,7 +93,7 @@ function addTeamButtons() {
 function updateTeamButtons() {
     const buttons = document.getElementById('team-buttons').children;
     for (let i = 0; i < buttons.length; i++) {
-        const isActive = i === currentTeamIndex;
+        const isActive = i === servingTeamIndex;
         buttons[i].classList.toggle('active', isActive);
         const teamName = teams[i].teamName;
         if (isActive) {
@@ -171,7 +171,7 @@ function showAddPlayerModal() {
     modal.style.display = 'block';
 
     // Set the modal title to include the team name
-    const teamName = teams[currentTeamIndex].teamName;
+    const teamName = teams[servingTeamIndex].teamName;
     const modalTitle = modal.querySelector('h2');
     modalTitle.textContent = `Add Player (${teamName})`;
 
@@ -203,7 +203,7 @@ function showAddPlayerModal() {
 
 
 function addPlayer(number, name) {
-    const team = teams[currentTeamIndex];
+    const team = teams[servingTeamIndex];
     // Check if player with same number or name exists
     const existingPlayer = team.players.find(
         (player) => player.number === number || player.name === name
@@ -243,7 +243,7 @@ function showEditTeamModal() {
     const playersDiv = document.getElementById('edit-team-players');
     playersDiv.innerHTML = ''; // Clear existing content
 
-    const team = teams[currentTeamIndex];
+    const team = teams[servingTeamIndex];
     team.players.forEach((player, index) => {
         const playerDiv = document.createElement('div');
         playerDiv.className = 'edit-player';
@@ -292,8 +292,8 @@ function updatePlayerButtons() {
     const playerButtonsContainer = document.getElementById('player-buttons');
     playerButtonsContainer.innerHTML = ''; // Clear existing buttons
 
-    if (currentTeamIndex !== null) {
-        const players = teams[currentTeamIndex].players;
+    if (servingTeamIndex !== null) {
+        const players = teams[servingTeamIndex].players;
         players.forEach((player, index) => {
             const btn = document.createElement('button');
             const isActive = index === currentPlayerIndex;
@@ -391,25 +391,30 @@ function drawLine(start, end) {
             rating: 0, // default rating
             timestamp: new Date(),
         };
-        teams[currentTeamIndex].players[currentPlayerIndex].serves.push(serve);
+        teams[servingTeamIndex].players[currentPlayerIndex].serves.push(serve);
     }
     drawServes();
 }
 
 function isValidLine(sx, ex) {
-    if (!flipped) {
-        return sx < 0.5 && ex > 0.5;
-    } else {
+    if (isReceivingTeamLeft()) {
         return sx > 0.5 && ex < 0.5;
+    } else {
+        return sx < 0.5 && ex > 0.5;
+
     }
 }
 
 function isAttack(xStart) {
-    if (!flipped) {
-        return xStart > 0.25;
-    } else {
+    if (isReceivingTeamLeft()) {
         return xStart < 0.75;
+    } else {
+        return xStart > 0.25;
     }
+}
+
+function isReceivingTeamLeft() {
+    return (courtFlipped && servingTeamIndex == 0) || (!courtFlipped && servingTeamIndex == 1)
 }
 
 function drawCourt() {
@@ -440,7 +445,7 @@ function drawCourt() {
     ctx.fillStyle = '#000';
     ctx.font = '16px Arial';
 
-    const ownFieldLeft = flipped; // When flipped, own field is on the left
+    const receivingTeamLeft = isReceivingTeamLeft();
 
     // Define field boundaries
     const fieldLeft = insetX;
@@ -450,7 +455,7 @@ function drawCourt() {
 
     // Define own field boundaries
     let ownFieldLeftX, ownFieldRightX;
-    if (ownFieldLeft) {
+    if (receivingTeamLeft) {
         ownFieldLeftX = fieldLeft;
         ownFieldRightX = fieldLeft + innerWidth / 2;
     } else {
@@ -476,19 +481,18 @@ function drawCourt() {
     const textWidthB = ctx.measureText(teams[1].teamName).width;
     const padding = 10;
 
-    if (!ownFieldLeft) {
-        ctx.fillText(teams[0].teamName, padding, 20);
-        ctx.fillText(teams[1].teamName, canvas.width - textWidthB - padding, 20);
-    } else {
+    if (courtFlipped) {
         ctx.fillText(teams[1].teamName, padding, 20);
         ctx.fillText(teams[0].teamName, canvas.width - textWidthA - padding, 20);
+
+    } else {
+        ctx.fillText(teams[0].teamName, padding, 20);
+        ctx.fillText(teams[1].teamName, canvas.width - textWidthB - padding, 20);
     }
 
     // Own side positions
     let positions;
-    if (ownFieldLeft) {
-        // Own field is on the left
-        // Labels: from top to bottom: 5 4, 6 3, 1 2
+    if (receivingTeamLeft) {
         positions = [
             { num: '5', x: oneThirdX, y: positionsY[0] },
             { num: '4', x: twoThirdX, y: positionsY[0] },
@@ -498,8 +502,6 @@ function drawCourt() {
             { num: '2', x: twoThirdX, y: positionsY[2] },
         ];
     } else {
-        // Own field is on the right
-        // Labels: from top to bottom: 1 2, 6 3, 5 4
         positions = [
             { num: '2', x: oneThirdX, y: positionsY[0] },
             { num: '1', x: twoThirdX, y: positionsY[0] },
@@ -517,7 +519,7 @@ function drawCourt() {
 function drawServes() {
     drawCourt();
     if (currentPlayerIndex !== null) {
-        const player = teams[currentTeamIndex].players[currentPlayerIndex];
+        const player = teams[servingTeamIndex].players[currentPlayerIndex];
         const playerServes = player.serves;
         const totalServes = playerServes.length;
         playerServes.forEach((serve, index) => {
@@ -577,7 +579,7 @@ function drawArrow(sx, sy, ex, ey, color) {
 
 function undoLastServe() {
     if (currentPlayerIndex !== null) {
-        const player = teams[currentTeamIndex].players[currentPlayerIndex];
+        const player = teams[servingTeamIndex].players[currentPlayerIndex];
         if (player.serves.length > 0) {
             player.serves.pop();
             drawServes();
@@ -597,7 +599,7 @@ function resetApp() {
 }
 
 function flipCourt() {
-    flipped = !flipped;
+    courtFlipped = !courtFlipped;
     teams.forEach((team) => {
         team.players.forEach((player) => {
             player.serves = player.serves.map((serve) => rotateServe(serve));
