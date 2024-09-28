@@ -4,7 +4,6 @@ let teams = [];
 let servingTeamIndex = 0;
 let currentPlayerIndex = null;
 
-// Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
 
 const FIELD_SIZE = 0.7;
@@ -14,6 +13,7 @@ let mouseDownPoint = null;
 let clickStartPoint = null;
 
 let courtFlipped = false;
+let currentServeData = null; // To hold serve data before rating
 
 window.addEventListener('resize', resizeCanvas);
 
@@ -36,18 +36,15 @@ initializeApp();
 resizeCanvas();
 drawCourt();
 
-
 function initializeApp() {
-
-    const team1Name = 'Lenting';
-    const team2Name = 'TV Ingolstadt';
+    let team1Name = 'Lenting';
+    let team2Name = 'TV Ingolstadt';
 
     const debug = true;
     if (!debug) {
         team1Name = prompt('Enter the name of Team 1:');
         team2Name = prompt('Enter the name of Team 2:');
     }
-
 
     if (team1Name && team2Name) {
         teams = [
@@ -69,8 +66,35 @@ function initializeApp() {
         alert('Both team names are required.');
         initializeApp(); // Restart initialization if names are not provided
     }
-}
 
+    // Set up rating buttons event handlers
+    document.getElementById('rating-negative').onclick = () => {
+        if (currentServeData) {
+            currentServeData.rating = -1;
+            addServe(currentServeData);
+            currentServeData = null;
+            document.getElementById('rating-modal').style.display = 'none';
+        }
+    };
+
+    document.getElementById('rating-neutral').onclick = () => {
+        if (currentServeData) {
+            currentServeData.rating = 0;
+            addServe(currentServeData);
+            currentServeData = null;
+            document.getElementById('rating-modal').style.display = 'none';
+        }
+    };
+
+    document.getElementById('rating-positive').onclick = () => {
+        if (currentServeData) {
+            currentServeData.rating = 1;
+            addServe(currentServeData);
+            currentServeData = null;
+            document.getElementById('rating-modal').style.display = 'none';
+        }
+    };
+}
 
 function addTeamButtons() {
     const teamButtonsContainer = document.getElementById('team-buttons');
@@ -103,7 +127,6 @@ function updateTeamButtons() {
         }
     }
 }
-
 
 // Helper function to get the current position from mouse or touch event
 function getEventPos(e) {
@@ -201,7 +224,6 @@ function showAddPlayerModal() {
     };
 }
 
-
 function addPlayer(number, name) {
     const team = teams[servingTeamIndex];
     // Check if player with same number or name exists
@@ -258,10 +280,19 @@ function showEditTeamModal() {
         nameInput.type = 'text';
         nameInput.value = player.name;
 
-        playerDiv.appendChild(document.createTextNode('Number: '));
+        // Calculate serve ratings counts
+        const negativeCount = player.serves.filter(s => s.rating === -1).length;
+        const neutralCount = player.serves.filter(s => s.rating === 0).length;
+        const positiveCount = player.serves.filter(s => s.rating === 1).length;
+
+        const statsLabel = document.createElement('span');
+        statsLabel.textContent = ` 🏐${negativeCount}/${neutralCount}/${positiveCount}`;
+
+        playerDiv.appendChild(document.createTextNode('Nr: '));
         playerDiv.appendChild(numberInput);
         playerDiv.appendChild(document.createTextNode(' Name: '));
         playerDiv.appendChild(nameInput);
+        playerDiv.appendChild(statsLabel);
 
         playersDiv.appendChild(playerDiv);
 
@@ -316,8 +347,6 @@ function updatePlayerButtons() {
         });
     }
 }
-
-
 
 /* Unified Event Handling Functions */
 
@@ -383,16 +412,28 @@ function handleEnd(e) {
 
 function drawLine(start, end) {
     if (isValidLine(start.x, end.x)) {
-        const serve = {
+        const serveData = {
             startX: start.x,
             startY: start.y,
             endX: end.x,
             endY: end.y,
-            rating: 0, // default rating
             timestamp: new Date(),
         };
-        teams[servingTeamIndex].players[currentPlayerIndex].serves.push(serve);
+        showRatingMenu(serveData); // Show rating menu
     }
+    drawServes();
+}
+
+function showRatingMenu(serveData) {
+    currentServeData = serveData;
+
+    // Show the modal
+    const modal = document.getElementById('rating-modal');
+    modal.style.display = 'block';
+}
+
+function addServe(serveData) {
+    teams[servingTeamIndex].players[currentPlayerIndex].serves.push(serveData);
     drawServes();
 }
 
@@ -401,7 +442,6 @@ function isValidLine(sx, ex) {
         return sx > 0.5 && ex < 0.5;
     } else {
         return sx < 0.5 && ex > 0.5;
-
     }
 }
 
@@ -414,7 +454,7 @@ function isAttack(xStart) {
 }
 
 function isReceivingTeamLeft() {
-    return (courtFlipped && servingTeamIndex == 0) || (!courtFlipped && servingTeamIndex == 1)
+    return courtFlipped === (servingTeamIndex === 0);
 }
 
 function drawCourt() {
@@ -484,7 +524,6 @@ function drawCourt() {
     if (courtFlipped) {
         ctx.fillText(teams[1].teamName, padding, 20);
         ctx.fillText(teams[0].teamName, canvas.width - textWidthA - padding, 20);
-
     } else {
         ctx.fillText(teams[0].teamName, padding, 20);
         ctx.fillText(teams[1].teamName, canvas.width - textWidthB - padding, 20);

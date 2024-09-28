@@ -162,3 +162,21 @@ body {
 .edit-player {
     margin-bottom: 10px;
 }
+
+/* Rating Buttons Styles */
+#rating-buttons {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 20px;
+}
+
+#rating-buttons button {
+    font-size: 40px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+#rating-buttons button:hover {
+    transform: scale(1.2);
+}
