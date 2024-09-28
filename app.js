@@ -39,19 +39,15 @@ drawCourt();
 
 function initializeApp() {
 
-    /*
-    teams = [
-        {
-            teamName: 'Lenting',
-            players: [],
-        },
-        {
-            teamName: 'ESV',
-            players: [],
-        },
-    ];*/
-    const team1Name = prompt('Enter the name of Team 1:');
-    const team2Name = prompt('Enter the name of Team 2:');
+    const team1Name = 'Lenting';
+    const team2Name = 'TV Ingolstadt';
+
+    const debug = true;
+    if (!debug) {
+        team1Name = prompt('Enter the name of Team 1:');
+        team2Name = prompt('Enter the name of Team 2:');
+    }
+
 
     if (team1Name && team2Name) {
         teams = [
@@ -292,7 +288,8 @@ function updatePlayerButtons() {
         const players = teams[currentTeamIndex].players;
         players.forEach((player, index) => {
             const btn = document.createElement('button');
-            btn.textContent = player.name;
+            btn.textContent = player.number; // Display player number on the button
+            btn.title = player.name;        // Show player name as tooltip
             btn.addEventListener('click', () => {
                 currentPlayerIndex = index;
                 updatePlayerButtons();
@@ -303,6 +300,7 @@ function updatePlayerButtons() {
         });
     }
 }
+
 
 /* Unified Event Handling Functions */
 
