@@ -45,12 +45,7 @@ document.getElementById('undo').addEventListener('click', App.events.undoLastSer
 document.getElementById('reset').title= 'Reset application';
 document.getElementById('reset').addEventListener('click', function () {
     if (confirm('Do you really want to reset the application?')) {
-        App.models.teams.forEach((team) => {
-            team.players = [];
-        });
-        App.models.currentPlayerIndex = null;
-        App.events.updatePlayerButtons();
-        App.draw.drawCourt();
+        App.init.initializeApp();
     }
 });
 document.getElementById('flip').title = 'Teams switch side';
