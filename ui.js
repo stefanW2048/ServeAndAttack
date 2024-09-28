@@ -30,24 +30,24 @@ var App = App || {};
                 const number = document.getElementById('player-number').value.trim();
                 const name = document.getElementById('player-name').value.trim();
 
-                if (number && name) {
+                if (number) {
                     App.ui.addPlayer(number, name);
                     modal.style.display = 'none';
                     document.getElementById('add-player-form').reset();
                 } else {
-                    alert('Please enter both number and name.');
+                    alert('Please enter a player number.');
                 }
             };
         },
 
         addPlayer: function (number, name) {
             const team = App.models.teams[App.models.servingTeamIndex];
-            // Check if player with same number or name exists
+            // Check if player with same number exists
             const existingPlayer = team.players.find(
-                (player) => player.number === number || player.name === name
+                (player) => player.number === number 
             );
             if (existingPlayer) {
-                alert('Player with same number or name already exists in this team.');
+                alert('Player with same number already exists in this team.');
             } else {
                 const newPlayer = {
                     number: number,
