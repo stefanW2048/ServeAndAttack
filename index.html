@@ -11,21 +11,52 @@
     <!-- Remove top-buttons from here -->
     <!-- Wrap court-container and top-buttons in a new div -->
     <div id="main-content">
-		<div id="top-buttons">
+        <div id="top-buttons">
             <button id="add-player">Add player</button>
+            <button id="edit-team">Edit Team</button>
             <button id="undo">Undo</button>
             <button id="reset">Reset</button>
             <button id="flip">Flip</button>
         </div>
+        <div id="team-buttons">
+            <!-- Team buttons will be dynamically added here -->
+        </div>
         <div id="court-container">
             <canvas id="court"></canvas>
         </div>
-		<div id="player-buttons">
-        <!-- Player buttons will be dynamically added here -->
-		</div>
-        
+        <div id="player-buttons">
+            <!-- Player buttons will be dynamically added here -->
+        </div>
     </div>
-    
+
+    <!-- Add Player Modal -->
+    <div id="add-player-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="add-player-close">&times;</span>
+            <h2>Add Player</h2>
+            <form id="add-player-form">
+                <label for="player-number">Number:</label>
+                <input type="text" id="player-number" name="player-number" maxlength="3" required><br><br>
+                <label for="player-name">Name:</label>
+                <input type="text" id="player-name" name="player-name" required><br><br>
+                <button type="submit">OK</button>
+                <button type="button" id="add-player-cancel">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Team Modal -->
+    <div id="edit-team-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="edit-team-close">&times;</span>
+            <h2>Edit Team</h2>
+            <div id="edit-team-players">
+                <!-- Player list will be dynamically generated here -->
+            </div>
+            <button type="button" id="edit-team-done">Done</button>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

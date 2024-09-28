@@ -1,27 +1,24 @@
 const canvas = document.getElementById('court');
 const ctx = canvas.getContext('2d');
-let players = {};
-let currentPlayer = null;
-let teamNames = {};
-
+let teams = [];
+let currentTeamIndex = 0;
+let currentPlayerIndex = null;
 
 // Threshold to distinguish between a click and a drag
 const DRAG_THRESHOLD = 0.01;
 
 const FIELD_SIZE = 0.7;
-const BORDER_SIZE = 0.5*(1.0 - FIELD_SIZE);
+const BORDER_SIZE = 0.5 * (1.0 - FIELD_SIZE);
 
 let mouseDownPoint = null;
 let clickStartPoint = null;
 
 let flipped = false;
 
-
 window.addEventListener('resize', resizeCanvas);
 
-
-
-document.getElementById('add-player').addEventListener('click', addPlayer);
+document.getElementById('add-player').addEventListener('click', showAddPlayerModal);
+document.getElementById('edit-team').addEventListener('click', showEditTeamModal);
 document.getElementById('undo').addEventListener('click', undoLastServe);
 document.getElementById('reset').addEventListener('click', resetApp);
 document.getElementById('flip').addEventListener('click', flipCourt);
@@ -35,22 +32,49 @@ canvas.addEventListener('touchstart', handleStart, { passive: false });
 canvas.addEventListener('touchmove', handleMove, { passive: false });
 canvas.addEventListener('touchend', handleEnd);
 
-
 initializeApp();
 resizeCanvas();
 drawCourt();
 
 function initializeApp() {
-    // Prompt for team names
-    const team1 = prompt('Enter the name of Team 1:');
-    const team2 = prompt('Enter the name of Team 2:');
-    if (team1 && team2) {
-        teamNames[0] = team1;
-        teamNames[1] = team2;
-        drawCourt(); // Update the court to display team names
-    } else {
-        alert('Both team names are required.');
-        initializeApp(); // Restart initialization if names are not provided
+    teams = [
+        {
+            teamName: 'Lenting',
+            players: [],
+        },
+        {
+            teamName: 'ESV',
+            players: [],
+        },
+    ];
+    currentTeamIndex = 0;
+    currentPlayerIndex = null;
+    addTeamButtons();
+    updateTeamButtons();
+}
+
+function addTeamButtons() {
+    const teamButtonsContainer = document.getElementById('team-buttons');
+    teamButtonsContainer.innerHTML = ''; // Clear existing buttons
+
+    teams.forEach((team, index) => {
+        const btn = document.createElement('button');
+        btn.textContent = team.teamName;
+        btn.addEventListener('click', () => {
+            currentTeamIndex = index;
+            currentPlayerIndex = null; // Reset current player
+            updateTeamButtons();
+            updatePlayerButtons();
+            drawServes();
+        });
+        teamButtonsContainer.appendChild(btn);
+    });
+}
+
+function updateTeamButtons() {
+    const buttons = document.getElementById('team-buttons').children;
+    for (let i = 0; i < buttons.length; i++) {
+        buttons[i].classList.toggle('active', i === currentTeamIndex);
     }
 }
 
@@ -72,7 +96,7 @@ function getEventPos(e) {
 
     return {
         x: (clientX - rect.left) / canvas.width,
-        y: (clientY - rect.top) / canvas.height
+        y: (clientY - rect.top) / canvas.height,
     };
 }
 
@@ -114,40 +138,140 @@ function resizeCanvas() {
     drawServes();
 }
 
+function showAddPlayerModal() {
+    // Show the modal
+    const modal = document.getElementById('add-player-modal');
+    modal.style.display = 'block';
 
+    // Close button
+    document.getElementById('add-player-close').onclick = function () {
+        modal.style.display = 'none';
+    };
 
-function addPlayer() {
-    const name = prompt('Enter player name:');
-    if (name) {
-        if (!players[name]) {
-            // Check if this is the first player
+    // Cancel button
+    document.getElementById('add-player-cancel').onclick = function () {
+        modal.style.display = 'none';
+    };
 
-            players[name] = [];
-            currentPlayer = name;
-            addPlayerButton(name);
-            updatePlayerButtons();
-            drawServes();
+    // Submit form
+    document.getElementById('add-player-form').onsubmit = function (e) {
+        e.preventDefault();
+        const number = document.getElementById('player-number').value.trim();
+        const name = document.getElementById('player-name').value.trim();
+
+        if (number && name) {
+            addPlayer(number, name);
+            modal.style.display = 'none';
+            document.getElementById('add-player-form').reset();
         } else {
-            alert('Player already exists.');
+            alert('Please enter both number and name.');
         }
+    };
+}
+
+function addPlayer(number, name) {
+    const team = teams[currentTeamIndex];
+    // Check if player with same number or name exists
+    const existingPlayer = team.players.find(
+        (player) => player.number === number || player.name === name
+    );
+    if (existingPlayer) {
+        alert('Player with same number or name already exists in this team.');
+    } else {
+        const newPlayer = {
+            number: number,
+            name: name,
+            serves: [],
+        };
+        team.players.push(newPlayer);
+        currentPlayerIndex = team.players.length - 1;
+        updatePlayerButtons();
+        drawServes();
     }
 }
 
-function addPlayerButton(name) {
-    const btn = document.createElement('button');
-    btn.textContent = name;
-    btn.addEventListener('click', () => {
-        currentPlayer = name;
+function showEditTeamModal() {
+    // Show the modal
+    const modal = document.getElementById('edit-team-modal');
+    modal.style.display = 'block';
+
+    // Close button
+    document.getElementById('edit-team-close').onclick = function () {
+        modal.style.display = 'none';
+    };
+
+    // Done button
+    document.getElementById('edit-team-done').onclick = function () {
+        modal.style.display = 'none';
         updatePlayerButtons();
-        drawServes();
+    };
+
+    // Generate player list for editing
+    const playersDiv = document.getElementById('edit-team-players');
+    playersDiv.innerHTML = ''; // Clear existing content
+
+    const team = teams[currentTeamIndex];
+    team.players.forEach((player, index) => {
+        const playerDiv = document.createElement('div');
+        playerDiv.className = 'edit-player';
+
+        const numberInput = document.createElement('input');
+        numberInput.type = 'text';
+        numberInput.value = player.number;
+        numberInput.maxLength = 3;
+        numberInput.style.width = '50px';
+
+        const nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = player.name;
+
+        playerDiv.appendChild(document.createTextNode('Number: '));
+        playerDiv.appendChild(numberInput);
+        playerDiv.appendChild(document.createTextNode(' Name: '));
+        playerDiv.appendChild(nameInput);
+
+        playersDiv.appendChild(playerDiv);
+
+        // Save changes when inputs lose focus
+        numberInput.onblur = function () {
+            const newNumber = numberInput.value.trim();
+            if (newNumber) {
+                player.number = newNumber;
+            } else {
+                alert('Number cannot be empty.');
+                numberInput.value = player.number;
+            }
+        };
+
+        nameInput.onblur = function () {
+            const newName = nameInput.value.trim();
+            if (newName) {
+                player.name = newName;
+            } else {
+                alert('Name cannot be empty.');
+                nameInput.value = player.name;
+            }
+        };
     });
-    document.getElementById('player-buttons').appendChild(btn);
 }
 
 function updatePlayerButtons() {
-    const buttons = document.getElementById('player-buttons').children;
-    for (let btn of buttons) {
-        btn.classList.toggle('active', btn.textContent === currentPlayer);
+    const playerButtonsContainer = document.getElementById('player-buttons');
+    playerButtonsContainer.innerHTML = ''; // Clear existing buttons
+
+    if (currentTeamIndex !== null) {
+        const players = teams[currentTeamIndex].players;
+        players.forEach((player, index) => {
+            const btn = document.createElement('button');
+            btn.textContent = player.name;
+            btn.addEventListener('click', () => {
+                currentPlayerIndex = index;
+                updatePlayerButtons();
+                drawServes();
+            });
+            btn.classList.toggle('active', index === currentPlayerIndex);
+            playerButtonsContainer.appendChild(btn);
+        });
     }
 }
 
@@ -155,8 +279,8 @@ function updatePlayerButtons() {
 
 function handleStart(e) {
     e.preventDefault();
-    if (!currentPlayer) {
-        addPlayer();
+    if (currentPlayerIndex === null) {
+        showAddPlayerModal();
         return;
     }
     const currentPosition = getEventPos(e);
@@ -181,7 +305,7 @@ function handleMove(e) {
             clickStartPoint.y,
             currentPosition.x,
             currentPosition.y,
-           1.0
+            1.0
         );
         return;
     }
@@ -193,7 +317,7 @@ function handleMove(e) {
             mouseDownPoint.y,
             currentPosition.x,
             currentPosition.y,
-           1.0
+            1.0
         );
         return;
     }
@@ -215,10 +339,17 @@ function handleEnd(e) {
 
 function drawLine(start, end) {
     if (isValidLine(start.x, end.x)) {
-        const serve = { startX: start.x, startY: start.y, endX: end.x, endY: end.y };
-        players[currentPlayer].push(serve);
-    } 
-	drawServes();
+        const serve = {
+            startX: start.x,
+            startY: start.y,
+            endX: end.x,
+            endY: end.y,
+            rating: 0, // default rating
+            timestamp: new Date(),
+        };
+        teams[currentTeamIndex].players[currentPlayerIndex].serves.push(serve);
+    }
+    drawServes();
 }
 
 function isValidLine(sx, ex) {
@@ -230,7 +361,7 @@ function isValidLine(sx, ex) {
 }
 
 function isAttack(xStart) {
-	if (!flipped) {
+    if (!flipped) {
         return xStart > 0.25;
     } else {
         return xStart < 0.75;
@@ -297,18 +428,16 @@ function drawCourt() {
     // Draw team name label
     ctx.fillStyle = '#000';
     ctx.font = '16px Arial';
-    const textWidthA = ctx.measureText(teamNames[0]).width;
-	const textWidthB = ctx.measureText(teamNames[1]).width;
+    const textWidthA = ctx.measureText(teams[0].teamName).width;
+    const textWidthB = ctx.measureText(teams[1].teamName).width;
     const padding = 10;
 
     if (!ownFieldLeft) {
-        ctx.fillText(teamNames[0], padding, 20);
-		ctx.fillText(teamNames[1], canvas.width - textWidthB - padding, 20);
-		
+        ctx.fillText(teams[0].teamName, padding, 20);
+        ctx.fillText(teams[1].teamName, canvas.width - textWidthB - padding, 20);
     } else {
-		ctx.fillText(teamNames[1], padding, 20);
-        ctx.fillText(teamNames[0], canvas.width - textWidthA - padding, 20);
-		
+        ctx.fillText(teams[1].teamName, padding, 20);
+        ctx.fillText(teams[0].teamName, canvas.width - textWidthA - padding, 20);
     }
 
     // Own side positions
@@ -336,39 +465,45 @@ function drawCourt() {
             { num: '4', x: twoThirdX, y: positionsY[2] },
         ];
     }
-    positions.forEach(pos => {
+    positions.forEach((pos) => {
         ctx.fillText(pos.num, pos.x - 8, pos.y);
     });
 }
 
-      
-
 function drawServes() {
     drawCourt();
-    if (currentPlayer) {
-        const playerServes = players[currentPlayer];
+    if (currentPlayerIndex !== null) {
+        const player = teams[currentTeamIndex].players[currentPlayerIndex];
+        const playerServes = player.serves;
         const totalServes = playerServes.length;
         playerServes.forEach((serve, index) => {
             // Calculate opacity based on serve age
             const opacity = 0.2 + (0.9 * (index + 1)) / totalServes;
-			drawServeOrAttack(serve.startX, serve.startY, serve.endX, serve.endY, opacity);
+            drawServeOrAttack(
+                serve.startX,
+                serve.startY,
+                serve.endX,
+                serve.endY,
+                opacity
+            );
         });
     }
 }
 
 function drawServeOrAttack(sx, sy, ex, ey, opacity) {
-	const startX = sx * canvas.width;
+    const startX = sx * canvas.width;
     const startY = sy * canvas.height;
     const endX = ex * canvas.width;
     const endY = ey * canvas.height;
 
-    drawArrow(startX, startY, endX, endY, getColor(sx,opacity));
+    drawArrow(startX, startY, endX, endY, getColor(sx, opacity));
 }
-function getColor(sx,opacity){
-	if(isAttack(sx)){
-		return `rgba(255, 0, 0, ${opacity})`;
-	}
-	return `rgba(0, 0, 255, ${opacity})`;
+
+function getColor(sx, opacity) {
+    if (isAttack(sx)) {
+        return `rgba(255, 0, 0, ${opacity})`;
+    }
+    return `rgba(0, 0, 255, ${opacity})`;
 }
 
 function drawArrow(sx, sy, ex, ey, color) {
@@ -397,33 +532,40 @@ function drawArrow(sx, sy, ex, ey, color) {
 }
 
 function undoLastServe() {
-    if (currentPlayer && players[currentPlayer].length > 0) {
-        players[currentPlayer].pop();
-        drawServes();
+    if (currentPlayerIndex !== null) {
+        const player = teams[currentTeamIndex].players[currentPlayerIndex];
+        if (player.serves.length > 0) {
+            player.serves.pop();
+            drawServes();
+        }
     }
 }
 
 function resetApp() {
     if (confirm('Do you really want to reset the application?')) {
-        players = {};
-        currentPlayer = null;
-        document.getElementById('player-buttons').innerHTML = '';
+        teams.forEach((team) => {
+            team.players = [];
+        });
+        currentPlayerIndex = null;
+        updatePlayerButtons();
         drawCourt();
     }
 }
 
 function flipCourt() {
     flipped = !flipped;
-    // Rotate serves coordinates
-    for (let player in players) {
-        players[player] = players[player].map(serve => rotateServe(serve));
-    }
+    teams.forEach((team) => {
+        team.players.forEach((player) => {
+            player.serves = player.serves.map((serve) => rotateServe(serve));
+        });
+    });
     drawServes();
 }
 
 function rotateServe(serve) {
     // Rotate around the center point (0.5, 0.5)
     return {
+        ...serve,
         startX: 1 - serve.startX,
         startY: 1 - serve.startY,
         endX: 1 - serve.endX,
