@@ -36,7 +36,10 @@ initializeApp();
 resizeCanvas();
 drawCourt();
 
+
 function initializeApp() {
+
+    /*
     teams = [
         {
             teamName: 'Lenting',
@@ -46,12 +49,32 @@ function initializeApp() {
             teamName: 'ESV',
             players: [],
         },
-    ];
-    currentTeamIndex = 0;
-    currentPlayerIndex = null;
-    addTeamButtons();
-    updateTeamButtons();
+    ];*/
+    const team1Name = prompt('Enter the name of Team 1:');
+    const team2Name = prompt('Enter the name of Team 2:');
+
+    if (team1Name && team2Name) {
+        teams = [
+            {
+                teamName: team1Name,
+                players: [],
+            },
+            {
+                teamName: team2Name,
+                players: [],
+            },
+        ];
+        currentTeamIndex = 0;
+        currentPlayerIndex = null;
+        addTeamButtons();
+        updateTeamButtons();
+        drawCourt(); // Update the court to display the new team names
+    } else {
+        alert('Both team names are required.');
+        initializeApp(); // Restart initialization if names are not provided
+    }
 }
+
 
 function addTeamButtons() {
     const teamButtonsContainer = document.getElementById('team-buttons');
@@ -143,6 +166,11 @@ function showAddPlayerModal() {
     const modal = document.getElementById('add-player-modal');
     modal.style.display = 'block';
 
+    // Set the modal title to include the team name
+    const teamName = teams[currentTeamIndex].teamName;
+    const modalTitle = modal.querySelector('h2');
+    modalTitle.textContent = `Add Player (${teamName})`;
+
     // Close button
     document.getElementById('add-player-close').onclick = function () {
         modal.style.display = 'none';
@@ -168,6 +196,7 @@ function showAddPlayerModal() {
         }
     };
 }
+
 
 function addPlayer(number, name) {
     const team = teams[currentTeamIndex];
@@ -457,12 +486,12 @@ function drawCourt() {
         // Own field is on the right
         // Labels: from top to bottom: 1 2, 6 3, 5 4
         positions = [
-            { num: '1', x: oneThirdX, y: positionsY[0] },
-            { num: '2', x: twoThirdX, y: positionsY[0] },
-            { num: '6', x: oneThirdX, y: positionsY[1] },
-            { num: '3', x: twoThirdX, y: positionsY[1] },
-            { num: '5', x: oneThirdX, y: positionsY[2] },
-            { num: '4', x: twoThirdX, y: positionsY[2] },
+            { num: '2', x: oneThirdX, y: positionsY[0] },
+            { num: '1', x: twoThirdX, y: positionsY[0] },
+            { num: '3', x: oneThirdX, y: positionsY[1] },
+            { num: '6', x: twoThirdX, y: positionsY[1] },
+            { num: '4', x: oneThirdX, y: positionsY[2] },
+            { num: '5', x: twoThirdX, y: positionsY[2] },
         ];
     }
     positions.forEach((pos) => {
