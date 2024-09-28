@@ -8,13 +8,13 @@ var App = App || {};
             let team1Name = 'Lenting';
             let team2Name = 'TV Ingolstadt';
 
-            const debug = true;
+            const debug = false;
             if (!debug) {
                 team1Name = prompt('Enter the name of Team 1:');
                 team2Name = prompt('Enter the name of Team 2:');
             }
 
-            if (team1Name && team2Name) {
+            if (team1Name && team2Name && !(team1Name==team2Name)) {
                 App.models.teams = [
                     {
                         teamName: team1Name,

@@ -62,31 +62,40 @@ var App = App || {};
         handleMove: function (e) {
             e.preventDefault();
             const currentPosition = App.utils.getEventPos(e);
-
+        
             if (App.events.clickStartPoint != null) {
                 App.draw.drawServes();
-                App.draw.drawServeOrAttack(
-                    App.events.clickStartPoint.x,
-                    App.events.clickStartPoint.y,
-                    currentPosition.x,
-                    currentPosition.y,
-                    1.0
-                );
+        
+                // Create a temporary serve object
+                const tempServe = {
+                    startX: App.events.clickStartPoint.x,
+                    startY: App.events.clickStartPoint.y,
+                    endX: currentPosition.x,
+                    endY: currentPosition.y,
+                    rating: null, // No rating yet
+                };
+        
+                App.draw.drawServeOrAttack(tempServe, 1.0);
                 return;
             }
-
+        
             if (App.events.mouseDownPoint != null) {
                 App.draw.drawServes();
-                App.draw.drawServeOrAttack(
-                    App.events.mouseDownPoint.x,
-                    App.events.mouseDownPoint.y,
-                    currentPosition.x,
-                    currentPosition.y,
-                    1.0
-                );
+        
+                // Create a temporary serve object
+                const tempServe = {
+                    startX: App.events.mouseDownPoint.x,
+                    startY: App.events.mouseDownPoint.y,
+                    endX: currentPosition.x,
+                    endY: currentPosition.y,
+                    rating: null, // No rating yet
+                };
+        
+                App.draw.drawServeOrAttack(tempServe, 1.0);
                 return;
             }
         },
+        
 
         handleEnd: function (e) {
             e.preventDefault();

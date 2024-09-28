@@ -116,33 +116,39 @@ var App = App || {};
                 const totalServes = playerServes.length;
                 playerServes.forEach((serve, index) => {
                     // Calculate opacity based on serve age
-                    const opacity = 0.2 + (0.9 * (index + 1)) / totalServes;
-                    App.draw.drawServeOrAttack(
-                        serve.startX,
-                        serve.startY,
-                        serve.endX,
-                        serve.endY,
-                        opacity
-                    );
+                    const opacity = 0.5 + (0.5 * (index + 1)) / totalServes;
+                    App.draw.drawServeOrAttack(serve, opacity);
                 });
             }
         },
-
-        drawServeOrAttack: function (sx, sy, ex, ey, opacity) {
-            const startX = sx * App.canvas.width;
-            const startY = sy * App.canvas.height;
-            const endX = ex * App.canvas.width;
-            const endY = ey * App.canvas.height;
-
-            App.draw.drawArrow(startX, startY, endX, endY, App.draw.getColor(sx, opacity));
+        
+        drawServeOrAttack: function (serve, opacity) {
+            const startX = serve.startX * App.canvas.width;
+            const startY = serve.startY * App.canvas.height;
+            const endX = serve.endX * App.canvas.width;
+            const endY = serve.endY * App.canvas.height;
+        
+            App.draw.drawArrow(startX, startY, endX, endY, App.draw.getColor(serve, opacity));
         },
-
-        getColor: function (sx, opacity) {
-            if (App.utils.isAttack(sx)) {
-                return `rgba(255, 0, 0, ${opacity})`;
+        
+        getColor: function (serve, opacity) {
+            let color;
+            if (serve.rating === 1) {
+                // Positive rating - Red
+                color = `rgba(255, 0, 0, ${opacity})`; // Red
+            } else if (serve.rating === 0) {
+                // Neutral rating - Black
+                color = `rgba(0, 0, 0, ${opacity})`; // Black
+            } else if (serve.rating === -1) {
+                // Negative rating - Brown
+                color = `rgba(115, 32, 32, ${opacity})`; // Brown
+            } else {
+                // Default color for undefined rating - Gray
+                color = `rgba(128, 128, 128, ${opacity})`; // Gray
             }
-            return `rgba(0, 0, 255, ${opacity})`;
+            return color;
         },
+        
 
         drawArrow: function (sx, sy, ex, ey, color) {
             const ctx = App.ctx;
