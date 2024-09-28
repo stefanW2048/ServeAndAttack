@@ -93,9 +93,17 @@ function addTeamButtons() {
 function updateTeamButtons() {
     const buttons = document.getElementById('team-buttons').children;
     for (let i = 0; i < buttons.length; i++) {
-        buttons[i].classList.toggle('active', i === currentTeamIndex);
+        const isActive = i === currentTeamIndex;
+        buttons[i].classList.toggle('active', isActive);
+        const teamName = teams[i].teamName;
+        if (isActive) {
+            buttons[i].textContent = '🏐 ' + teamName; // Add volleyball emoji
+        } else {
+            buttons[i].textContent = teamName; // No emoji for inactive teams
+        }
     }
 }
+
 
 // Helper function to get the current position from mouse or touch event
 function getEventPos(e) {
@@ -288,18 +296,27 @@ function updatePlayerButtons() {
         const players = teams[currentTeamIndex].players;
         players.forEach((player, index) => {
             const btn = document.createElement('button');
-            btn.textContent = player.number; // Display player number on the button
-            btn.title = player.name;        // Show player name as tooltip
+            const isActive = index === currentPlayerIndex;
+
+            // Set button text: volleyball emoji + number if active, else just number
+            if (isActive) {
+                btn.textContent = '🏐 ' + player.number; // Active player with emoji
+            } else {
+                btn.textContent = player.number; // Inactive player
+            }
+
+            btn.title = player.name; // Show player name as tooltip
             btn.addEventListener('click', () => {
                 currentPlayerIndex = index;
                 updatePlayerButtons();
                 drawServes();
             });
-            btn.classList.toggle('active', index === currentPlayerIndex);
+            btn.classList.toggle('active', isActive);
             playerButtonsContainer.appendChild(btn);
         });
     }
 }
+
 
 
 /* Unified Event Handling Functions */
