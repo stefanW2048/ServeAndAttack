@@ -10,10 +10,9 @@
 </head>
 
 <body>
-    <!-- Remove top-buttons from here -->
-    <!-- Wrap court-container and top-buttons in a new div -->
     <div id="main-content">
 
+        <!-- Left Side Panel -->
         <div id="left-panel">
             <div id="top-buttons">
                 <button id="add-player">➕</button>
@@ -23,17 +22,21 @@
                 <button id="flip">↔️</button>
             </div>
         </div>
-        <!-- Court Container -->
-        <div id="court-container">
-            <canvas id="court"></canvas>
-        </div>
-        <!-- Right Side Panel -->
-        <div id="right-panel">
-            <div id="team-buttons">
-                <!-- Team buttons will be dynamically added here -->
+
+        <!-- Center Content -->
+        <div id="center-content">
+            <!-- Court Container -->
+            <div id="court-container">
+                <canvas id="court"></canvas>
             </div>
-            <div id="player-buttons">
-                <!-- Player buttons will be dynamically added here -->
+            <!-- Team and Player Buttons -->
+            <div id="team-player-buttons">
+                <div id="team-buttons">
+                    <!-- Team buttons will be dynamically added here -->
+                </div>
+                <div id="player-buttons">
+                    <!-- Player buttons will be dynamically added here -->
+                </div>
             </div>
         </div>
 
@@ -70,7 +73,7 @@
     <!-- Rating Modal -->
     <div id="rating-modal" class="modal">
         <div class="modal-content">
-            <h2>Rate the Serve</h2>
+            <h2>Rate the Serve/Attack</h2>
             <div id="rating-buttons">
                 <button id="rating-negative">🙁</button>
                 <button id="rating-neutral">🙂</button>

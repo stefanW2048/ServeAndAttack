@@ -16,6 +16,17 @@ body {
     flex: 1;
 }
 
+#left-panel {
+    background-color: #f0f0f0;
+}
+
+#center-content {
+    display: flex;
+    flex-direction: column; /* Default to column */
+    flex: 1;
+    overflow: hidden;
+}
+
 #court-container {
     flex: 1;
     position: relative;
@@ -33,20 +44,11 @@ body {
     touch-action: none;
 }
 
-/* Panels */
-#left-panel, #right-panel {
+/* Team and Player Buttons */
+#team-player-buttons {
     display: flex;
     flex-direction: column;
-    max-height: 100vh;
     overflow-y: auto;
-}
-
-#left-panel {
-    background-color: #f0f0f0;
-}
-
-#right-panel {
-    background-color: #f0f0f0;
 }
 
 /* Buttons */
@@ -66,7 +68,6 @@ body {
     color: #fff;
     cursor: pointer;
     font-size: 16px;
-    width: 100%;
 }
 
 #top-buttons button:hover, #team-buttons button:hover, #player-buttons button:hover {
@@ -83,6 +84,8 @@ body {
 }
 
 /* Responsive layout adjustments */
+
+/* Landscape Mode */
 @media screen and (orientation: landscape) {
     body {
         flex-direction: row; /* Switch to row direction */
@@ -93,23 +96,32 @@ body {
         flex: 1;
     }
 
-    #left-panel, #right-panel {
-        flex: 0 0 200px; /* Fixed width for side panels */
+    #left-panel {
+        flex: 0 0 200px; /* Fixed width for side panel */
         max-width: 200px;
     }
 
+    #center-content {
+        flex: 1;
+        display: flex;
+        flex-direction: row; /* Arrange court and buttons side by side */
+    }
+
     #court-container {
-        flex: 1; /* Court takes remaining space */
+        flex: 3; /* Court takes more space */
         max-height: 100vh;
+    }
+
+    #team-player-buttons {
+        flex: 1;
+        overflow-y: auto;
     }
 
     /* Buttons inside panels */
     #top-buttons, #team-buttons, #player-buttons {
-        display: flex;
         flex-direction: column;
         margin: 10px;
         align-items: stretch;
-        flex: 1;
     }
 
     #top-buttons button, #team-buttons button, #player-buttons button {
@@ -122,6 +134,43 @@ body {
     #court {
         width: 100%;
         height: auto;
+    }
+}
+
+/* Portrait Mode */
+@media screen and (orientation: portrait) {
+    #main-content {
+        flex-direction: column;
+    }
+
+    #left-panel {
+        flex: none;
+    }
+
+    #center-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column; /* Court and buttons arranged vertically */
+    }
+
+    #court-container {
+        flex: none;
+    }
+
+    #team-player-buttons {
+        flex: none;
+    }
+
+    /* Buttons inside panels */
+    #top-buttons, #team-buttons, #player-buttons {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #top-buttons button, #team-buttons button, #player-buttons button {
+        width: auto;
+        margin: 5px;
     }
 }
 
@@ -162,35 +211,6 @@ body {
     cursor: pointer;
 }
 
-/* Adjustments for mobile portrait mode */
-@media screen and (orientation: portrait) {
-    #main-content {
-        flex-direction: column;
-    }
-
-    #left-panel, #right-panel {
-        flex: none;
-        max-width: none;
-    }
-
-    #court-container {
-        flex: 1;
-        max-height: none;
-    }
-
-    /* Buttons inside panels */
-    #top-buttons, #team-buttons, #player-buttons {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    #top-buttons button, #team-buttons button, #player-buttons button {
-        width: auto;
-        margin: 5px;
-    }
-}
-
 .edit-player {
     margin-bottom: 10px;
 }
@@ -211,3 +231,4 @@ body {
 
 #rating-buttons button:hover {
     transform: scale(1.2);
+}
