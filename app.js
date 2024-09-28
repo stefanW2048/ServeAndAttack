@@ -36,9 +36,13 @@ App.resizeCanvas();
 App.draw.drawCourt();
 
 // Attach event listeners for buttons
+document.getElementById('add-player').title = 'Add player';
 document.getElementById('add-player').addEventListener('click', App.ui.showAddPlayerModal);
+document.getElementById('edit-team').title='Edit team';
 document.getElementById('edit-team').addEventListener('click', App.ui.showEditTeamModal);
+document.getElementById('undo').title='Undo last serve';
 document.getElementById('undo').addEventListener('click', App.events.undoLastServe);
+document.getElementById('reset').title= 'Reset application';
 document.getElementById('reset').addEventListener('click', function () {
     if (confirm('Do you really want to reset the application?')) {
         App.models.teams.forEach((team) => {
@@ -49,4 +53,6 @@ document.getElementById('reset').addEventListener('click', function () {
         App.draw.drawCourt();
     }
 });
+document.getElementById('flip').title = 'Teams switch side';
 document.getElementById('flip').addEventListener('click', App.draw.flipCourt);
+
