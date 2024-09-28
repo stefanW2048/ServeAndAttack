@@ -1,32 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
-    <title>Volleyball Serve Tracker</title>
+    <title>🏐SWI Volleyball Serve Tracker🏐</title>
     <link rel="stylesheet" href="styles.css">
     <!-- Viewport meta tag for mobile responsiveness -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 </head>
+
 <body>
     <!-- Remove top-buttons from here -->
     <!-- Wrap court-container and top-buttons in a new div -->
     <div id="main-content">
-        <div id="top-buttons">
-            <button id="add-player">➕</button>
-            <button id="edit-team">📝</button>
-            <button id="undo">↩️</button>
-            <button id="reset">🗑️</button>
-            <button id="flip">↔️</button>
+
+        <div id="left-panel">
+            <div id="top-buttons">
+                <button id="add-player">➕</button>
+                <button id="edit-team">📝</button>
+                <button id="undo">↩️</button>
+                <button id="reset">🗑️</button>
+                <button id="flip">↔️</button>
+            </div>
         </div>
-        <div id="team-buttons">
-            <!-- Team buttons will be dynamically added here -->
-        </div>
+        <!-- Court Container -->
         <div id="court-container">
             <canvas id="court"></canvas>
         </div>
-        <div id="player-buttons">
-            <!-- Player buttons will be dynamically added here -->
+        <!-- Right Side Panel -->
+        <div id="right-panel">
+            <div id="team-buttons">
+                <!-- Team buttons will be dynamically added here -->
+            </div>
+            <div id="player-buttons">
+                <!-- Player buttons will be dynamically added here -->
+            </div>
         </div>
+
     </div>
 
     <!-- Add Player Modal -->
@@ -78,4 +88,5 @@
     <script src="init.js"></script>
     <script src="app.js"></script>
 </body>
+
 </html>
