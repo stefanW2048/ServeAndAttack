@@ -44,7 +44,7 @@ var App = App || {};
             const team = App.models.teams[App.models.servingTeamIndex];
             // Check if player with same number exists
             const existingPlayer = team.players.find(
-                (player) => player.number === number 
+                (player) => player.number === number
             );
             if (existingPlayer) {
                 alert('Player with same number already exists in this team.');
@@ -180,5 +180,161 @@ var App = App || {};
                 }
             }
         },
+
+        saveData: function () {
+            const data = {
+                teams: App.models.teams,
+                courtFlipped: App.models.courtFlipped,
+            };
+
+            // Serialize data to JSON string
+            const jsonData = JSON.stringify(data);
+
+            // Create a Blob from the JSON string
+            const blob = new Blob([jsonData], { type: 'application/json' });
+
+            // Generate filename
+            const timestamp = new Date();
+            const dateStr = timestamp.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStr = timestamp.toTimeString().slice(0, 5).replace(/:/g, '');
+            const teamNames = App.models.teams.map(team => team.teamName.replace(/\s+/g, '_')).join('_');
+            const filename = `${dateStr}_${timeStr}_${teamNames}.swi`;
+
+            // Create a link to download the Blob
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+
+            // Append link to body and trigger click
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+        },
+
+        loadData: function () {
+            // Create an input element to select files
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.swi,application/json';
+
+            input.onchange = function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        try {
+                            const data = JSON.parse(event.target.result);
+
+                            // Show team selection modal
+                            App.ui.showTeamSelectionModal(data);
+                        } catch (err) {
+                            alert('Invalid file format.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            // Trigger the file input click
+            input.click();
+        },
+
+        showTeamSelectionModal: function (data) {
+            // Create a modal to select which team data to import
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+
+            const modalContent = document.createElement('div');
+            modalContent.className = 'modal-content';
+
+            const closeBtn = document.createElement('span');
+            closeBtn.className = 'close';
+            closeBtn.innerHTML = '&times;';
+            closeBtn.onclick = function () {
+                modal.style.display = 'none';
+                document.body.removeChild(modal);
+            };
+
+            const title = document.createElement('h2');
+            title.textContent = 'Select Team to Import';
+
+            const form = document.createElement('form');
+
+            // Radio buttons for team selection
+            data.teams.forEach((team, index) => {
+                const label = document.createElement('label');
+                const radio = document.createElement('input');
+                radio.type = 'radio';
+                radio.name = 'teamSelect';
+                radio.value = index;
+                if (index === 0) radio.checked = true; // Default to first team
+                label.appendChild(radio);
+                label.appendChild(document.createTextNode(team.teamName));
+                form.appendChild(label);
+                form.appendChild(document.createElement('br'));
+            });
+
+            // Input for the second team name if only one team is imported
+            const secondTeamDiv = document.createElement('div');
+            secondTeamDiv.style.marginTop = '10px';
+            const secondTeamLabel = document.createElement('label');
+            secondTeamLabel.textContent = 'Enter the name of the second team: ';
+            const secondTeamInput = document.createElement('input');
+            secondTeamInput.type = 'text';
+            secondTeamInput.placeholder = 'Team 2 Name';
+            secondTeamLabel.appendChild(secondTeamInput);
+            secondTeamDiv.appendChild(secondTeamLabel);
+
+            form.appendChild(secondTeamDiv);
+
+            const importBtn = document.createElement('button');
+            importBtn.type = 'button';
+            importBtn.textContent = 'Import';
+            importBtn.onclick = function () {
+                const selectedTeamIndex = parseInt(form.teamSelect.value, 10);
+                const selectedTeam = data.teams[selectedTeamIndex];
+                const otherTeamName = secondTeamInput.value.trim();
+
+                if (selectedTeam) {
+                    if (!otherTeamName) {
+                        alert('Please enter the name of the second team.');
+                        return;
+                    }
+                    // Initialize teams
+                    App.models.teams = [
+                        selectedTeamIndex === 0 ? selectedTeam : { teamName: otherTeamName, players: [] },
+                        selectedTeamIndex === 1 ? selectedTeam : { teamName: otherTeamName, players: [] },
+                    ];
+
+                    // Set serving team index
+                    App.models.servingTeamIndex = 0;
+                    App.models.currentPlayerIndex = null;
+                    App.models.courtFlipped = data.courtFlipped || false;
+
+                    App.ui.addTeamButtons();
+                    App.ui.updateTeamButtons();
+                    App.events.updatePlayerButtons();
+                    App.draw.drawServes();
+
+                    modal.style.display = 'none';
+                    document.body.removeChild(modal);
+                } else {
+                    alert('Please select a team to import.');
+                }
+            };
+
+            modalContent.appendChild(closeBtn);
+            modalContent.appendChild(title);
+            modalContent.appendChild(form);
+            modalContent.appendChild(importBtn);
+
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+        },
+
+
     };
 })();

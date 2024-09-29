@@ -8,7 +8,7 @@ var App = App || {};
             let team1Name = 'Lenting';
             let team2Name = 'TV Ingolstadt';
 
-            const debug = false;
+            const debug = true;
             if (!debug) {
                 team1Name = prompt('Enter the name of Team 1:');
                 team2Name = prompt('Enter the name of Team 2:');

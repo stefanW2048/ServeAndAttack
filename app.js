@@ -51,3 +51,9 @@ document.getElementById('reset').addEventListener('click', function () {
 document.getElementById('flip').title = 'Teams switch side';
 document.getElementById('flip').addEventListener('click', App.draw.flipCourt);
 
+// Save and Load Buttons
+document.getElementById('save').title = 'Save data';
+document.getElementById('save').addEventListener('click', App.ui.saveData);
+document.getElementById('load').title = 'Load data';
+document.getElementById('load').addEventListener('click', App.ui.loadData);
+
