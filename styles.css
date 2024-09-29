@@ -243,3 +243,33 @@ body {
 #rating-buttons button:hover {
     transform: scale(1.2);
 }
+
+/* Styles for the player table in Edit Team Modal */
+.player-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.player-table th,
+.player-table td {
+    border: 1px solid #ddd;
+    padding: 2px;
+}
+
+.player-table th {
+    background-color: #f2f2f2;
+    text-align: center;
+    font-weight: bold;
+}
+
+.player-table td {
+    vertical-align: middle;
+}
+
+/* Adjust input fields within the table */
+.player-table input[type="text"] {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 2px;
+}

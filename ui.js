@@ -100,7 +100,7 @@ var App = App || {};
             headerRow.appendChild(nameHeader);
         
             const statsHeader = document.createElement('th');
-            statsHeader.textContent = 'Serves (−/0/+)';
+            statsHeader.textContent = '🏐(−/0/+)';
             headerRow.appendChild(statsHeader);
         
             thead.appendChild(headerRow);
