@@ -267,7 +267,7 @@ var App = App || {};
                 if (isActive) {
                     buttons[i].textContent = '🏐 ' + teamName; // Add volleyball emoji
                 } else {
-                    buttons[i].textContent = teamName; // No emoji for inactive teams
+                    buttons[i].textContent = '🎾 '+teamName; //  emoji for receiving team
                 }
             }
         },
@@ -401,9 +401,13 @@ var App = App || {};
             importBtn.type = 'button';
             importBtn.textContent = 'Import';
             importBtn.onclick = function () {
+                
+                
                 const selectedTeamIndices = Array.from(form.elements['teamSelect'])
                     .filter(cb => cb.checked)
                     .map(cb => parseInt(cb.value, 10));
+
+                   
 
                 if (selectedTeamIndices.length === 0) {
                     alert('Please select at least one team to import.');
@@ -414,10 +418,11 @@ var App = App || {};
                     // Only one team selected
                     const selectedTeam = data.teams[selectedTeamIndices[0]];
                     const otherTeamName = secondTeamInput.value.trim();
+                    
 
-                    if (App.models.teams.length < 2) {
+                    if (App.models.teams[0].players.length == 0 && App.models.teams[1].players.length == 0) {
                         // No existing teams or only one team
-                        if (!otherTeamName) {
+                        if (!otherTeamName)  {
                             alert('Please enter the name of the second team.');
                             return;
                         }
