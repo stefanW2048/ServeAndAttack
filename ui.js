@@ -333,7 +333,7 @@ var App = App || {};
         },
 
         showTeamSelectionModal: function (data) {
-            // Create a modal to select which team data to import
+            // Create a modal to select which team(s) to import
             const modal = document.createElement('div');
             modal.className = 'modal';
             modal.style.display = 'block';
@@ -350,71 +350,109 @@ var App = App || {};
             };
 
             const title = document.createElement('h2');
-            title.textContent = 'Select Team to Import';
+            title.textContent = 'Select Team(s) to Import';
 
             const form = document.createElement('form');
 
-            // Radio buttons for team selection
+            // Checkboxes for team selection
+            const teamSelectDiv = document.createElement('div');
+            teamSelectDiv.style.marginTop = '10px';
+
             data.teams.forEach((team, index) => {
                 const label = document.createElement('label');
-                const radio = document.createElement('input');
-                radio.type = 'radio';
-                radio.name = 'teamSelect';
-                radio.value = index;
-                if (index === 0) radio.checked = true; // Default to first team
-                label.appendChild(radio);
-                label.appendChild(document.createTextNode(team.teamName));
-                form.appendChild(label);
-                form.appendChild(document.createElement('br'));
+                label.style.display = 'block';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'teamSelect';
+                checkbox.value = index;
+                checkbox.checked = true; // Default to both teams selected
+                label.appendChild(checkbox);
+                label.appendChild(document.createTextNode(' ' + team.teamName));
+                teamSelectDiv.appendChild(label);
             });
 
-            // Input for the second team name if only one team is imported
+            form.appendChild(teamSelectDiv);
+
+            // Input for the second team name if needed
             const secondTeamDiv = document.createElement('div');
             secondTeamDiv.style.marginTop = '10px';
+            secondTeamDiv.style.display = 'none'; // Hidden by default
             const secondTeamLabel = document.createElement('label');
             secondTeamLabel.textContent = 'Enter the name of the second team: ';
             const secondTeamInput = document.createElement('input');
             secondTeamInput.type = 'text';
-            secondTeamInput.placeholder = 'Team 2 Name';
+            secondTeamInput.placeholder = 'Team Name';
             secondTeamLabel.appendChild(secondTeamInput);
             secondTeamDiv.appendChild(secondTeamLabel);
 
             form.appendChild(secondTeamDiv);
 
+            // Event listener to handle checkbox changes
+            form.onchange = function () {
+                const checkedTeams = Array.from(form.elements['teamSelect']).filter(cb => cb.checked);
+                if (checkedTeams.length === 1) {
+                    secondTeamDiv.style.display = 'block';
+                } else {
+                    secondTeamDiv.style.display = 'none';
+                }
+            };
+
             const importBtn = document.createElement('button');
             importBtn.type = 'button';
             importBtn.textContent = 'Import';
             importBtn.onclick = function () {
-                const selectedTeamIndex = parseInt(form.teamSelect.value, 10);
-                const selectedTeam = data.teams[selectedTeamIndex];
-                const otherTeamName = secondTeamInput.value.trim();
+                const selectedTeamIndices = Array.from(form.elements['teamSelect'])
+                    .filter(cb => cb.checked)
+                    .map(cb => parseInt(cb.value, 10));
 
-                if (selectedTeam) {
-                    if (!otherTeamName) {
-                        alert('Please enter the name of the second team.');
-                        return;
-                    }
-                    // Initialize teams
-                    App.models.teams = [
-                        selectedTeamIndex === 0 ? selectedTeam : { teamName: otherTeamName, players: [] },
-                        selectedTeamIndex === 1 ? selectedTeam : { teamName: otherTeamName, players: [] },
-                    ];
-
-                    // Set serving team index
-                    App.models.servingTeamIndex = 0;
-                    App.models.currentPlayerIndex = null;
-                    App.models.courtFlipped = data.courtFlipped || false;
-
-                    App.ui.addTeamButtons();
-                    App.ui.updateTeamButtons();
-                    App.events.updatePlayerButtons();
-                    App.draw.drawServes();
-
-                    modal.style.display = 'none';
-                    document.body.removeChild(modal);
-                } else {
-                    alert('Please select a team to import.');
+                if (selectedTeamIndices.length === 0) {
+                    alert('Please select at least one team to import.');
+                    return;
                 }
+
+                if (selectedTeamIndices.length === 1) {
+                    // Only one team selected
+                    const selectedTeam = data.teams[selectedTeamIndices[0]];
+                    const otherTeamName = secondTeamInput.value.trim();
+
+                    if (App.models.teams.length < 2) {
+                        // No existing teams or only one team
+                        if (!otherTeamName) {
+                            alert('Please enter the name of the second team.');
+                            return;
+                        }
+                        const emptyTeam = { teamName: otherTeamName, players: [] };
+                        App.models.teams = [selectedTeam, emptyTeam];
+                    } else {
+                        // Existing teams, override the empty team
+                        let emptyTeamIndex = App.models.teams.findIndex(team => team.players.length === 0);
+
+                        if (emptyTeamIndex !== -1) {
+                            // Empty team found, override it
+                            App.models.teams[emptyTeamIndex] = selectedTeam;
+                        } else {
+                            alert('No empty team found to override. Cannot import one team.');
+                            return;
+                        }
+                    }
+                } else {
+                    // Two teams selected
+                    // Discard existing data and load both teams
+                    App.models.teams = [data.teams[0], data.teams[1]];
+                }
+
+                App.models.servingTeamIndex = 0;
+                App.models.currentPlayerIndex = null;
+                App.models.currentTeamIndex = null;
+                App.models.courtFlipped = data.courtFlipped || false;
+
+                App.ui.addTeamButtons();
+                App.ui.updateTeamButtons();
+                App.events.updatePlayerButtons();
+                App.draw.drawServes();
+
+                modal.style.display = 'none';
+                document.body.removeChild(modal);
             };
 
             modalContent.appendChild(closeBtn);
@@ -424,6 +462,9 @@ var App = App || {};
 
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
+
+            // Trigger initial onchange to set the correct state
+            form.onchange();
         },
 
 
