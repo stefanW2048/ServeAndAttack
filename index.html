@@ -33,9 +33,6 @@
             </div>
             <!-- Team and Player Buttons -->
             <div id="team-player-buttons">
-                <div id="team-buttons">
-                    <!-- Team buttons will be dynamically added here -->
-                </div>
                 <div id="player-buttons">
                     <!-- Player buttons will be dynamically added here -->
                 </div>
@@ -80,7 +77,8 @@
     <!-- Rating Modal -->
     <div id="rating-modal" class="modal">
         <div class="modal-content">
-            <h2>Rate the Serve/Attack</h2>
+            <span class="close" id="rating-close">&times;</span> <!-- Added Close Button -->
+            <h2>Rate the Serve/Receive</h2>
             <div id="rating-buttons">
                 <button id="rating-negative">🙁</button>
                 <button id="rating-neutral">🙂</button>
@@ -88,6 +86,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Include JavaScript files in the correct order -->
     <script src="models.js"></script>

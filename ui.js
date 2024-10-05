@@ -240,37 +240,7 @@ var App = App || {};
             App.models.currentActionType = null;
         },
 
-        addTeamButtons: function () {
-            const teamButtonsContainer = document.getElementById('team-buttons');
-            teamButtonsContainer.innerHTML = ''; // Clear existing buttons
-
-            App.models.teams.forEach((team, index) => {
-                const btn = document.createElement('button');
-                btn.textContent = team.teamName;
-                btn.addEventListener('click', () => {
-                    App.models.servingTeamIndex = index;
-                    App.models.currentPlayerIndex = null; // Reset current player
-                    App.ui.updateTeamButtons();
-                    App.events.updatePlayerButtons();
-                    App.draw.drawServes();
-                });
-                teamButtonsContainer.appendChild(btn);
-            });
-        },
-
-        updateTeamButtons: function () {
-            const buttons = document.getElementById('team-buttons').children;
-            for (let i = 0; i < buttons.length; i++) {
-                const isActive = i === App.models.servingTeamIndex;
-                buttons[i].classList.toggle('active', isActive);
-                const teamName = App.models.teams[i].teamName;
-                if (isActive) {
-                    buttons[i].textContent = '🏐 ' + teamName; // Add volleyball emoji
-                } else {
-                    buttons[i].textContent = '🎾 '+teamName; //  emoji for receiving team
-                }
-            }
-        },
+      
 
         saveData: function () {
             const data = {
@@ -287,9 +257,8 @@ var App = App || {};
             // Generate filename
             const timestamp = new Date();
             const dateStr = timestamp.toISOString().slice(0, 10).replace(/-/g, '');
-            const timeStr = timestamp.toTimeString().slice(0, 5).replace(/:/g, '');
             const teamNames = App.models.teams.map(team => team.teamName.replace(/\s+/g, '_')).join('_');
-            const filename = `${dateStr}_${timeStr}_${teamNames}.swi`;
+            const filename = `${dateStr}_${teamNames}.swi`;
 
             // Create a link to download the Blob
             const link = document.createElement('a');
@@ -451,8 +420,6 @@ var App = App || {};
                 App.models.currentTeamIndex = null;
                 App.models.courtFlipped = data.courtFlipped || false;
 
-                App.ui.addTeamButtons();
-                App.ui.updateTeamButtons();
                 App.events.updatePlayerButtons();
                 App.draw.drawServes();
 

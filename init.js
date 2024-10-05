@@ -20,8 +20,6 @@ var App = App || {};
             ];
             App.models.servingTeamIndex = 0;
             App.models.currentPlayerIndex = null;
-            App.ui.addTeamButtons();
-            App.ui.updateTeamButtons();
             App.draw.drawCourt(); // Update the court to display the new team names
         },
 

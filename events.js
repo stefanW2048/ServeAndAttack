@@ -28,6 +28,10 @@ var App = App || {};
             document.getElementById('rating-positive').onclick = () => {
                 App.events.handleRating(1);
             };
+
+            document.getElementById('rating-close').onclick = () => {
+                App.ui.hideRatingMenu();
+            };
         },
 
         handleRating: function (rating) {
@@ -145,6 +149,12 @@ var App = App || {};
                 const servingTeamButton = document.createElement('button');
                 servingTeamButton.textContent = '🏐 ' + servingTeam.teamName;
                 servingTeamButton.classList.add('team-button');
+				servingTeamButton.addEventListener('click', () => {
+                    App.models.servingTeamIndex = (App.models.servingTeamIndex+1)%2;
+                    App.models.currentPlayerIndex = null; 
+                    App.events.updatePlayerButtons();
+                    App.draw.drawServes();
+                });
                 playerButtonsContainer.appendChild(servingTeamButton);
 
                 // Serving Team Players
@@ -182,6 +192,12 @@ var App = App || {};
                 const receivingTeamButton = document.createElement('button');
                 receivingTeamButton.textContent = '🎾 ' + receivingTeam.teamName;
                 receivingTeamButton.classList.add('team-button');
+				 receivingTeamButton.addEventListener('click', () => {
+                    App.models.servingTeamIndex = (App.models.servingTeamIndex+1)%2;
+                    App.models.currentPlayerIndex = null; 
+                    App.events.updatePlayerButtons();
+                    App.draw.drawServes();
+                });
                 playerButtonsContainer.appendChild(receivingTeamButton);
 
                 // Receiving Team Players
