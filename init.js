@@ -52,7 +52,6 @@ var App = App || {};
                 if (team1Name && team2Name && team1Name !== team2Name) {
                     App.models.teams[0].teamName = team1Name;
                     App.models.teams[1].teamName = team2Name;
-                    App.ui.updateTeamButtons();
                     App.draw.drawCourt(); // Update the court to display the new team names
                     return true;
                 } else {
