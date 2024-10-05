@@ -226,7 +226,7 @@ var App = App || {};
             const modal = document.getElementById('rating-modal');
             const modalTitle = modal.querySelector('h2');
             if (App.models.currentActionType === 'serve') {
-                modalTitle.textContent = 'Rate the Serve';
+                modalTitle.textContent = 'Rate the Serve/Attack';
             } else if (App.models.currentActionType === 'receive') {
                 modalTitle.textContent = 'Rate the Receive';
             }

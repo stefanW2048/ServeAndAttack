@@ -27,9 +27,9 @@ var App = App || {};
 
         isValidLine: function (sx, ex) {
             if (App.utils.isReceivingTeamLeft()) {
-                return sx > 0.5 && ex < 0.4;
+                return sx > 0.5;
             } else {
-                return sx < 0.5 && ex > 0.4;
+                return sx < 0.5 ;
             }
         },
 
