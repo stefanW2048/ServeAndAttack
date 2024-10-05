@@ -43,6 +43,7 @@ var App = App || {};
                     App.events.addReceive(App.models.currentActionData);
                 }
                 App.ui.hideRatingMenu();
+                App.ui.autoSave();
             }
         },
 

@@ -64,6 +64,8 @@ var App = App || {};
                 App.models.currentTeamIndex = App.models.servingTeamIndex; // Set current team
                 App.events.updatePlayerButtons();
                 App.draw.drawServes();
+
+                App.ui.autoSave();
             }
         },
 
@@ -260,7 +262,7 @@ var App = App || {};
             const timeStr = timestamp.toTimeString().slice(0, 5).replace(/:/g, '');
             const teamNames = App.models.teams.map(team => team.teamName.replace(/\s+/g, '_')).join('_');
             const filename = `${dateStr}_${timeStr}_${teamNames}.swi`;
-            
+
             // Create a link to download the Blob
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -301,6 +303,20 @@ var App = App || {};
             // Trigger the file input click
             input.click();
         },
+
+        autoSave: function () {
+            const data = {
+                teams: App.models.teams,
+                courtFlipped: App.models.courtFlipped,
+            };
+
+            // Serialize data to JSON string
+            const jsonData = JSON.stringify(data);
+
+            // Save data to localStorage
+            localStorage.setItem('volleyballTrackerData', jsonData);
+        },
+
 
         showTeamSelectionModal: function (data) {
             // Create a modal to select which team(s) to import

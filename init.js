@@ -5,22 +5,42 @@ var App = App || {};
 (function () {
     App.init = {
         initializeApp: function () {
-            let team1Name = 'Team 1';
-            let team2Name = 'Team 2';
+            // Check if data exists in localStorage
+            const jsonData = localStorage.getItem('volleyballTrackerData');
+            if (jsonData) {
+                try {
+                    const data = JSON.parse(jsonData);
+                    // Load data into the application
+                    App.models.teams = data.teams;
+                    App.models.courtFlipped = data.courtFlipped || false;
+                    App.models.servingTeamIndex = 0;
+                    App.models.currentPlayerIndex = null;
+                    App.models.currentTeamIndex = null;
 
+                    App.events.updatePlayerButtons();
+                    App.draw.drawServes();
+                } catch (err) {
+                    console.error('Failed to parse saved data:', err);
+                    this.initializeDefaultData();
+                }
+            } else {
+                // No saved data, initialize with default data
+                this.initializeDefaultData();
+            }
+        },
+
+        initializeDefaultData: function () {
             App.models.teams = [
-                {
-                    teamName: team1Name,
-                    players: [],
-                },
-                {
-                    teamName: team2Name,
-                    players: [],
-                },
+                { teamName: 'Team 1', players: [] },
+                { teamName: 'Team 2', players: [] },
             ];
             App.models.servingTeamIndex = 0;
             App.models.currentPlayerIndex = null;
-            App.draw.drawCourt(); // Update the court to display the new team names
+            App.models.currentTeamIndex = null;
+            App.models.courtFlipped = false;
+
+            App.events.updatePlayerButtons();
+            App.draw.drawCourt();
         },
 
         askTeamNames: function () {
