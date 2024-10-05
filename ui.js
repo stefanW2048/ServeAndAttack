@@ -240,7 +240,7 @@ var App = App || {};
             App.models.currentActionType = null;
         },
 
-      
+
 
         saveData: function () {
             const data = {
@@ -257,9 +257,10 @@ var App = App || {};
             // Generate filename
             const timestamp = new Date();
             const dateStr = timestamp.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStr = timestamp.toTimeString().slice(0, 5).replace(/:/g, '');
             const teamNames = App.models.teams.map(team => team.teamName.replace(/\s+/g, '_')).join('_');
-            const filename = `${dateStr}_${teamNames}.swi`;
-
+            const filename = `${dateStr}_${timeStr}_${teamNames}.swi`;
+            
             // Create a link to download the Blob
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
@@ -370,13 +371,13 @@ var App = App || {};
             importBtn.type = 'button';
             importBtn.textContent = 'Import';
             importBtn.onclick = function () {
-                
-                
+
+
                 const selectedTeamIndices = Array.from(form.elements['teamSelect'])
                     .filter(cb => cb.checked)
                     .map(cb => parseInt(cb.value, 10));
 
-                   
+
 
                 if (selectedTeamIndices.length === 0) {
                     alert('Please select at least one team to import.');
@@ -387,11 +388,11 @@ var App = App || {};
                     // Only one team selected
                     const selectedTeam = data.teams[selectedTeamIndices[0]];
                     const otherTeamName = secondTeamInput.value.trim();
-                    
+
 
                     if (App.models.teams[0].players.length == 0 && App.models.teams[1].players.length == 0) {
                         // No existing teams or only one team
-                        if (!otherTeamName)  {
+                        if (!otherTeamName) {
                             alert('Please enter the name of the second team.');
                             return;
                         }

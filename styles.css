@@ -60,7 +60,7 @@ body {
 
 #top-buttons button {
     margin: 5px;
-    padding: 6px 10px;
+    padding: 5px 8px;
     border: none;
     border-radius: 5px;
     background-color: #6200ee;
@@ -77,36 +77,6 @@ body {
     outline: none;
 }
 
-/* Team Buttons */
-#team-buttons {
-    margin: 10px 0;
-}
-
-#team-buttons button.team-button {
-    width: 100%;
-    font-weight: bold;
-    background-color: #6200ee;
-    color: #fff;
-    margin: 5px 0;
-    padding: 6px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-#team-buttons button.team-button:hover {
-    background-color: #3700b3;
-}
-
-#team-buttons button.active {
-    background-color: #03dac6;
-    color: #000;
-}
-
-#team-buttons button:focus {
-    outline: none;
-}
 
 /* Player Buttons */
 #player-buttons {
@@ -118,7 +88,7 @@ body {
 
 #player-buttons button {
     margin: 5px;
-    padding: 6px 10px;
+    padding: 3px 5px;
     border: none;
     border-radius: 5px;
     background-color: #03dac6;
@@ -196,15 +166,7 @@ body {
         flex-shrink: 0;
     }
 
-    #team-buttons {
-        margin: 10px 0;
-    }
-
-    #team-buttons button.team-button {
-        width: 100%;
-        margin: 5px 0;
-    }
-
+   
     #player-buttons {
         flex-direction: column;
         margin: 10px 0;
