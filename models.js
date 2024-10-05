@@ -7,8 +7,10 @@ var App = App || {};
         teams: [],
         servingTeamIndex: 0,
         currentPlayerIndex: null,
+        currentTeamIndex: null, // Added to track the current team
         courtFlipped: false,
-        currentServeData: null, // To hold serve data before rating
+        currentActionData: null, // To hold serve or receive data before rating
+        currentActionType: null, // To distinguish between 'serve' and 'receive'
 
         DRAG_THRESHOLD: 0.01,
         FIELD_SIZE: 0.7,

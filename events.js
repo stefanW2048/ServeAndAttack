@@ -18,28 +18,33 @@ var App = App || {};
 
             // Set up rating buttons event handlers
             document.getElementById('rating-negative').onclick = () => {
-                if (App.models.currentServeData) {
-                    App.models.currentServeData.rating = -1;
-                    App.draw.addServe(App.models.currentServeData);
-                    App.ui.hideRatingMenu();
-                }
+                App.events.handleRating(-1);
             };
 
             document.getElementById('rating-neutral').onclick = () => {
-                if (App.models.currentServeData) {
-                    App.models.currentServeData.rating = 0;
-                    App.draw.addServe(App.models.currentServeData);
-                    App.ui.hideRatingMenu();
-                }
+                App.events.handleRating(0);
             };
 
             document.getElementById('rating-positive').onclick = () => {
-                if (App.models.currentServeData) {
-                    App.models.currentServeData.rating = 1;
-                    App.draw.addServe(App.models.currentServeData);
-                    App.ui.hideRatingMenu();
-                }
+                App.events.handleRating(1);
             };
+        },
+
+        handleRating: function (rating) {
+            if (App.models.currentActionData) {
+                App.models.currentActionData.rating = rating;
+                if (App.models.currentActionType === 'serve') {
+                    App.draw.addServe(App.models.currentActionData);
+                } else if (App.models.currentActionType === 'receive') {
+                    App.events.addReceive(App.models.currentActionData);
+                }
+                App.ui.hideRatingMenu();
+            }
+        },
+
+        addReceive: function (receiveData) {
+            const player = App.models.teams[App.models.currentTeamIndex].players[App.models.currentPlayerIndex];
+            player.receives.push(receiveData);
         },
 
         handleStart: function (e) {
@@ -62,10 +67,10 @@ var App = App || {};
         handleMove: function (e) {
             e.preventDefault();
             const currentPosition = App.utils.getEventPos(e);
-        
+
             if (App.events.clickStartPoint != null) {
                 App.draw.drawServes();
-        
+
                 // Create a temporary serve object
                 const tempServe = {
                     startX: App.events.clickStartPoint.x,
@@ -74,14 +79,14 @@ var App = App || {};
                     endY: currentPosition.y,
                     rating: null, // No rating yet
                 };
-        
+
                 App.draw.drawServeOrAttack(tempServe, 1.0);
                 return;
             }
-        
+
             if (App.events.mouseDownPoint != null) {
                 App.draw.drawServes();
-        
+
                 // Create a temporary serve object
                 const tempServe = {
                     startX: App.events.mouseDownPoint.x,
@@ -90,12 +95,12 @@ var App = App || {};
                     endY: currentPosition.y,
                     rating: null, // No rating yet
                 };
-        
+
                 App.draw.drawServeOrAttack(tempServe, 1.0);
                 return;
             }
         },
-        
+
 
         handleEnd: function (e) {
             e.preventDefault();
@@ -130,28 +135,87 @@ var App = App || {};
             playerButtonsContainer.innerHTML = ''; // Clear existing buttons
 
             if (App.models.servingTeamIndex !== null) {
-                const players = App.models.teams[App.models.servingTeamIndex].players;
-                players.forEach((player, index) => {
-                    const btn = document.createElement('button');
-                    const isActive = index === App.models.currentPlayerIndex;
+                const servingTeamIndex = App.models.servingTeamIndex;
+                const receivingTeamIndex = 1 - App.models.servingTeamIndex;
 
-                    // Set button text: volleyball emoji + number if active, else just number
+                // Serving Team Section
+                const servingTeam = App.models.teams[servingTeamIndex];
+
+                // Serving Team Button
+                const servingTeamButton = document.createElement('button');
+                servingTeamButton.textContent = '🏐 ' + servingTeam.teamName;
+                servingTeamButton.classList.add('team-button');
+                playerButtonsContainer.appendChild(servingTeamButton);
+
+                // Serving Team Players
+                servingTeam.players.forEach((player, index) => {
+                    const btn = document.createElement('button');
+                    const isActive = index === App.models.currentPlayerIndex && App.models.currentTeamIndex === servingTeamIndex;
+
+                    // Set button text
                     if (isActive) {
-                        btn.textContent = '🏐 ' + player.number; // Active player with emoji
+                        btn.textContent = '🏐 ' + player.number;
                     } else {
-                        btn.textContent = player.number; // Inactive player
+                        btn.textContent = player.number;
                     }
 
-                    btn.title = player.name; // Show player name as tooltip
+                    btn.title = player.name; // Tooltip
                     btn.addEventListener('click', () => {
                         App.models.currentPlayerIndex = index;
+                        App.models.currentTeamIndex = servingTeamIndex;
                         App.events.updatePlayerButtons();
                         App.draw.drawServes();
                     });
                     btn.classList.toggle('active', isActive);
                     playerButtonsContainer.appendChild(btn);
                 });
+
+                // Separator
+                const separator = document.createElement('div');
+                separator.classList.add('separator');
+                playerButtonsContainer.appendChild(separator);
+
+                // Receiving Team Section
+                const receivingTeam = App.models.teams[receivingTeamIndex];
+
+                // Receiving Team Button
+                const receivingTeamButton = document.createElement('button');
+                receivingTeamButton.textContent = '🎾 ' + receivingTeam.teamName;
+                receivingTeamButton.classList.add('team-button');
+                playerButtonsContainer.appendChild(receivingTeamButton);
+
+                // Receiving Team Players
+                receivingTeam.players.forEach((player, index) => {
+                    const btn = document.createElement('button');
+                    const isActive = index === App.models.currentPlayerIndex && App.models.currentTeamIndex === receivingTeamIndex;
+
+                    // Set button text
+                    if (isActive) {
+                        btn.textContent = '🎾 ' + player.number;
+                    } else {
+                        btn.textContent = player.number;
+                    }
+
+                    btn.title = player.name; // Tooltip
+                    btn.addEventListener('click', () => {
+                        App.models.currentPlayerIndex = index;
+                        App.models.currentTeamIndex = receivingTeamIndex;
+                        App.events.updatePlayerButtons();
+                        App.events.createReceiveAction();
+                    });
+                    btn.classList.toggle('active', isActive);
+                    playerButtonsContainer.appendChild(btn);
+                });
             }
+        },
+
+        createReceiveAction: function () {
+            // Create receiveData object
+            const receiveData = {
+                timestamp: new Date(),
+            };
+            // Show rating menu for receive
+            App.ui.showRatingMenu(receiveData, 'receive');
         },
 
         undoLastServe: function () {

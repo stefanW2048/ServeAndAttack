@@ -6,7 +6,7 @@ var App = App || {};
     App.ui = {
         showAddPlayerModal: function () {
             // Ask for team names if not set
-            if(!App.init.askTeamNames()){
+            if (!App.init.askTeamNames()) {
                 return;
             }
             // Show the modal
@@ -45,9 +45,6 @@ var App = App || {};
         },
 
         addPlayer: function (number, name) {
-
-            
-
             const team = App.models.teams[App.models.servingTeamIndex];
             // Check if player with same number exists
             const existingPlayer = team.players.find(
@@ -60,9 +57,11 @@ var App = App || {};
                     number: number,
                     name: name,
                     serves: [],
+                    receives: [], // Initialize receives array
                 };
                 team.players.push(newPlayer);
                 App.models.currentPlayerIndex = team.players.length - 1;
+                App.models.currentTeamIndex = App.models.servingTeamIndex; // Set current team
                 App.events.updatePlayerButtons();
                 App.draw.drawServes();
             }
@@ -84,119 +83,161 @@ var App = App || {};
                 App.events.updatePlayerButtons();
             };
 
-            // Generate player list for editing
-            const playersDiv = document.getElementById('edit-team-players');
-            playersDiv.innerHTML = ''; // Clear existing content
-
-            const team = App.models.teams[App.models.servingTeamIndex];
-
-            // Create table structure
-            const table = document.createElement('table');
-            table.className = 'player-table';
-
-            // Create table header
-            const thead = document.createElement('thead');
-            const headerRow = document.createElement('tr');
-
-            const numberHeader = document.createElement('th');
-            numberHeader.textContent = 'Nr';
-            headerRow.appendChild(numberHeader);
-
-            const nameHeader = document.createElement('th');
-            nameHeader.textContent = 'Name';
-            headerRow.appendChild(nameHeader);
-
-            const statsHeader = document.createElement('th');
-            statsHeader.textContent = '🏐(−/0/+)';
-            headerRow.appendChild(statsHeader);
-
-            thead.appendChild(headerRow);
-            table.appendChild(thead);
-
-            // Create table body
-            const tbody = document.createElement('tbody');
-
-            team.players.forEach((player, index) => {
-                const row = document.createElement('tr');
-                row.className = 'edit-player-row';
-
-                // Number input
-                const numberCell = document.createElement('td');
-                const numberInput = document.createElement('input');
-                numberInput.type = 'text';
-                numberInput.value = player.number;
-                numberInput.maxLength = 3;
-                numberInput.style.width = '50px';
-                numberInput.style.textAlign = 'center';
-                numberCell.appendChild(numberInput);
-                row.appendChild(numberCell);
-
-                // Name input
-                const nameCell = document.createElement('td');
-                const nameInput = document.createElement('input');
-                nameInput.type = 'text';
-                nameInput.value = player.name || '';
-                nameInput.style.width = '100%';
-                nameCell.appendChild(nameInput);
-                row.appendChild(nameCell);
-
-                // Serve stats
-                const statsCell = document.createElement('td');
-                const negativeCount = player.serves.filter(s => s.rating === -1).length;
-                const neutralCount = player.serves.filter(s => s.rating === 0).length;
-                const positiveCount = player.serves.filter(s => s.rating === 1).length;
-                statsCell.textContent = `${negativeCount}/${neutralCount}/${positiveCount}`;
-                statsCell.style.textAlign = 'center';
-                row.appendChild(statsCell);
-
-                tbody.appendChild(row);
-
-                // Save changes when inputs lose focus
-                numberInput.onblur = function () {
-                    const newNumber = numberInput.value.trim();
-                    if (newNumber) {
-                        // Check for duplicate numbers
-                        const duplicate = team.players.find(
-                            (p, idx) => idx !== index && p.number === newNumber
-                        );
-                        if (duplicate) {
-                            alert('A player with this number already exists.');
-                            numberInput.value = player.number;
-                        } else {
-                            player.number = newNumber;
-                            App.events.updatePlayerButtons();
-                        }
-                    } else {
-                        alert('Number cannot be empty.');
-                        numberInput.value = player.number;
-                    }
-                };
-
-                nameInput.onblur = function () {
-                    const newName = nameInput.value.trim();
-                    // Name is optional; update directly
-                    player.name = newName;
-                    App.events.updatePlayerButtons();
-                };
+            // Team selection
+            const teamSelect = document.getElementById('edit-team-select');
+            teamSelect.innerHTML = '';
+            App.models.teams.forEach((team, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = team.teamName;
+                teamSelect.appendChild(option);
             });
 
-            table.appendChild(tbody);
-            playersDiv.appendChild(table);
+            // Generate player list for editing
+            const playersDiv = document.getElementById('edit-team-players');
+
+            const updatePlayerList = function () {
+                playersDiv.innerHTML = ''; // Clear existing content
+
+                const teamIndex = parseInt(teamSelect.value);
+                const team = App.models.teams[teamIndex];
+
+                // Create table structure
+                const table = document.createElement('table');
+                table.className = 'player-table';
+
+                // Create table header
+                const thead = document.createElement('thead');
+                const headerRow = document.createElement('tr');
+
+                const numberHeader = document.createElement('th');
+                numberHeader.textContent = 'Nr';
+                headerRow.appendChild(numberHeader);
+
+                const nameHeader = document.createElement('th');
+                nameHeader.textContent = 'Name';
+                headerRow.appendChild(nameHeader);
+
+                const serveStatsHeader = document.createElement('th');
+                serveStatsHeader.textContent = 'Serves (−/0/+)';
+                headerRow.appendChild(serveStatsHeader);
+
+                const receiveStatsHeader = document.createElement('th');
+                receiveStatsHeader.textContent = 'Receives (−/0/+)';
+                headerRow.appendChild(receiveStatsHeader);
+
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Create table body
+                const tbody = document.createElement('tbody');
+
+                team.players.forEach((player, index) => {
+                    const row = document.createElement('tr');
+                    row.className = 'edit-player-row';
+
+                    // Number input
+                    const numberCell = document.createElement('td');
+                    const numberInput = document.createElement('input');
+                    numberInput.type = 'text';
+                    numberInput.value = player.number;
+                    numberInput.maxLength = 3;
+                    numberInput.style.width = '50px';
+                    numberInput.style.textAlign = 'center';
+                    numberCell.appendChild(numberInput);
+                    row.appendChild(numberCell);
+
+                    // Name input
+                    const nameCell = document.createElement('td');
+                    const nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.value = player.name || '';
+                    nameInput.style.width = '100%';
+                    nameCell.appendChild(nameInput);
+                    row.appendChild(nameCell);
+
+                    // Serve stats
+                    const serveStatsCell = document.createElement('td');
+                    const negativeServeCount = player.serves.filter(s => s.rating === -1).length;
+                    const neutralServeCount = player.serves.filter(s => s.rating === 0).length;
+                    const positiveServeCount = player.serves.filter(s => s.rating === 1).length;
+                    serveStatsCell.textContent = `${negativeServeCount}/${neutralServeCount}/${positiveServeCount}`;
+                    serveStatsCell.style.textAlign = 'center';
+                    row.appendChild(serveStatsCell);
+
+                    // Receive stats
+                    const receiveStatsCell = document.createElement('td');
+                    const negativeReceiveCount = player.receives.filter(s => s.rating === -1).length;
+                    const neutralReceiveCount = player.receives.filter(s => s.rating === 0).length;
+                    const positiveReceiveCount = player.receives.filter(s => s.rating === 1).length;
+                    receiveStatsCell.textContent = `${negativeReceiveCount}/${neutralReceiveCount}/${positiveReceiveCount}`;
+                    receiveStatsCell.style.textAlign = 'center';
+                    row.appendChild(receiveStatsCell);
+
+                    tbody.appendChild(row);
+
+                    // Save changes when inputs lose focus
+                    numberInput.onblur = function () {
+                        const newNumber = numberInput.value.trim();
+                        if (newNumber) {
+                            // Check for duplicate numbers
+                            const duplicate = team.players.find(
+                                (p, idx) => idx !== index && p.number === newNumber
+                            );
+                            if (duplicate) {
+                                alert('A player with this number already exists.');
+                                numberInput.value = player.number;
+                            } else {
+                                player.number = newNumber;
+                                App.events.updatePlayerButtons();
+                            }
+                        } else {
+                            alert('Number cannot be empty.');
+                            numberInput.value = player.number;
+                        }
+                    };
+
+                    nameInput.onblur = function () {
+                        const newName = nameInput.value.trim();
+                        // Name is optional; update directly
+                        player.name = newName;
+                        App.events.updatePlayerButtons();
+                    };
+                });
+
+                table.appendChild(tbody);
+                playersDiv.appendChild(table);
+            };
+
+            // Update player list when team selection changes
+            teamSelect.onchange = updatePlayerList;
+
+            // Initial call to populate the player list
+            updatePlayerList();
         },
 
+        showRatingMenu: function (actionData, actionType) {
+            App.models.currentActionData = actionData;
+            App.models.currentActionType = actionType || 'serve';
 
-        showRatingMenu: function (serveData) {
-            App.models.currentServeData = serveData;
+            // Update the modal title
+            const modal = document.getElementById('rating-modal');
+            const modalTitle = modal.querySelector('h2');
+            if (App.models.currentActionType === 'serve') {
+                modalTitle.textContent = 'Rate the Serve';
+            } else if (App.models.currentActionType === 'receive') {
+                modalTitle.textContent = 'Rate the Receive';
+            }
 
             // Show the modal
-            const modal = document.getElementById('rating-modal');
             modal.style.display = 'block';
         },
 
         hideRatingMenu: function () {
             const modal = document.getElementById('rating-modal');
             modal.style.display = 'none';
-            App.models.currentServeData = null;
+            App.models.currentActionData = null;
+            App.models.currentActionType = null;
         },
 
         addTeamButtons: function () {
